@@ -5,16 +5,16 @@
  * Customers may get a discount depending on the product quantity they bought.
  *
  * @package SilverCart
- * @subpackage PriceRange
+ * @subpackage GraduatedPrices
  * @author Roland Lehmann <rlehmann@pixeltricks.de>
  * @copyright Pixeltricks GmbH
  * @since 03.08.2011
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License
  */
-class SilvercartPricerange extends DataObject {
+class SilvercartGraduatedPrice extends DataObject {
     
-    public static $singular_name = "price range";
-    public static $plural_name = "price ranges";
+    public static $singular_name = "graduated price";
+    public static $plural_name = "graduated prices";
     
     public static $db = array(
         'price' => 'Money', //price for a single position
@@ -25,8 +25,8 @@ class SilvercartPricerange extends DataObject {
         'SilvercartProduct' => 'SilvercartProduct'
     );
     
-    public static $belongs_many_many = array(
-        'SilvercartCustomerCategories' => 'SilvercartCustomerCategory'
+    public static $many_many = array(
+        'Groups' => 'Group'
     );
 
         /**
@@ -39,8 +39,8 @@ class SilvercartPricerange extends DataObject {
      * @since 5.7.2011
      */
     public function singular_name() {
-        if (_t('SilvercartPricerange.SINGULARNAME')) {
-            return _t('SilvercartPricerange.SINGULARNAME');
+        if (_t('SilvercartGraduatedPrice.SINGULARNAME')) {
+            return _t('SilvercartGraduatedPrice.SINGULARNAME');
         } else {
             return parent::singular_name();
         } 
@@ -56,8 +56,8 @@ class SilvercartPricerange extends DataObject {
      * @since 5.7.2011 
      */
     public function plural_name() {
-        if (_t('SilvercartPricerange.PLURALNAME')) {
-            return _t('SilvercartPricerange.PLURALNAME');
+        if (_t('SilvercartGraduatedPrice.PLURALNAME')) {
+            return _t('SilvercartGraduatedPrice.PLURALNAME');
         } else {
             return parent::plural_name();
         }   

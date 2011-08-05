@@ -5,13 +5,13 @@
  * Changes the behavior of price getters
  *
  * @package SilverCart
- * @subpackage PriceRange
+ * @subpackage GraduatedPrices
  * @author Roland Lehmann <rlehmann@pixeltricks.de>
  * @copyright Pixeltricks GmbH
  * @since 03.08.2011
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License
  */
-class SilvercartProductPricerangeDecorator extends DataObjectDecorator {
+class SilvercartProductGraduatedpriceDecorator extends DataObjectDecorator {
     
     /**
      * adds attributes and relations
@@ -24,7 +24,7 @@ class SilvercartProductPricerangeDecorator extends DataObjectDecorator {
     public function extraStatics() {
         return array(
             'has_many' => array(
-                'SilvercartPriceRanges' => 'SilvercartPricerange'
+                'SilvercartGraduatedPrices' => 'SilvercartGraduatedPrice'
             )
         );
     }
@@ -41,10 +41,10 @@ class SilvercartProductPricerangeDecorator extends DataObjectDecorator {
      */
     public function updatePrice(&$quantity) {
         $whereClause = sprintf("`SilvercartProductID` = '%s' AND `minimumQuantity` >= '%d'", $this->owner->ID, $quantity);
-        $priceRanges = DataObject::get('SilvercartPricerange', $whereClause, "priceAmount ASC");
-        if ($priceRanges) {
-            $priceRange = $priceRanges->First();
-            if ($priceRange->SilvercartCustomerCategories()) {
+        $graduatedPrices = DataObject::get('SilvercartGraduatedPrice', $whereClause, "priceAmount ASC");
+        if ($graduatedPrices) {
+            $graduatedPrice = $graduatedPrices->First();
+            if (false) {
                 
             }
             $member = Member::currentUser();
@@ -53,14 +53,14 @@ class SilvercartProductPricerangeDecorator extends DataObjectDecorator {
     }
     
 
-    public function getPricerangesForCustomersCategory($quantity) {
+    public function getGraduatedPricesForCustomersGroups($quantity) {
         $member = Member::currentUser();
         if ($member) {
             $whereClause = sprintf("`SilvercartProductID` = '%s' AND `minimumQuantity` >= '%d'", $this->owner->ID, $quantity);
-            $priceRanges = DataObject::get('SilvercartPricerange', $whereClause, "priceAmount ASC");
-            if ($priceRanges) {
-                $priceRange = $priceRanges->First();
-                return $priceRange;
+            $graduatedPrices = DataObject::get('SilvercartGraduatedPrice', $whereClause, "priceAmount ASC");
+            if ($graduatedPrices) {
+                $graduatedPrice = $graduatedPrices->First();
+                return $graduatedPrice;
             }
         }
         return false;

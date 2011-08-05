@@ -2,7 +2,7 @@
 /**
  * Copyright 2010, 2011 pixeltricks GmbH
  *
- * This file is part of SilverCart_Pricerange.
+ * This file is part of SilverCart_Graduatedprice.
  *
  * SilverCart is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
  *
  * English (US) language pack
  *
- * @package SilvercartPricerange
+ * @package SilvercartGraduatedprice
  * @subpackage i18n
  * @ignore
  */
@@ -27,5 +27,5 @@
 
 global $lang;
 
-$lang['en_US']['SilvercartPricerange']['PLURALNAME'] = 'price ranges';
-$lang['en_US']['SilvercartPricerange']['SINGULARNAME'] = 'price range';
+$lang['en_US']['SilvercartGraduatedprice']['PLURALNAME'] = 'graduated prices';
+$lang['en_US']['SilvercartGraduatedprice']['SINGULARNAME'] = 'graduated price';
