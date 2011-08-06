@@ -23,7 +23,7 @@ class SilvercartGraduatedpriceGroupDecorator extends DataObjectDecorator {
     public function extraStatics() {
         return array(
             'belongs_many_many' => array(
-                'SilvercartGraduatedprices' => 'SilvercartGraduatedprice'
+                'SilvercartGraduatedPrices' => 'SilvercartGraduatedPrice'
             )
         );
     }
