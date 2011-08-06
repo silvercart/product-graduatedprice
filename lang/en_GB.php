@@ -35,3 +35,5 @@ if (array_key_exists('en_GB', $lang) && is_array($lang['en_GB'])) {
 
 $lang['en_GB']['SilvercartGraduatedprice']['PLURALNAME'] = 'graduated price';
 $lang['en_GB']['SilvercartGraduatedprice']['SINGULARNAME'] = 'graduated price';
+$lang['en_GB']['SilvercartGraduatedprice']['PRICE'] = 'price';
+$lang['en_GB']['SilvercartGraduatedprice']['MINIMUMQUANTITY'] = 'minimum quantity';

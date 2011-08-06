@@ -29,3 +29,5 @@ global $lang;
 
 $lang['en_US']['SilvercartGraduatedprice']['PLURALNAME'] = 'graduated prices';
 $lang['en_US']['SilvercartGraduatedprice']['SINGULARNAME'] = 'graduated price';
+$lang['en_US']['SilvercartGraduatedprice']['PRICE'] = 'price';
+$lang['en_US']['SilvercartGraduatedprice']['MINIMUMQUANTITY'] = 'minimum quantity';

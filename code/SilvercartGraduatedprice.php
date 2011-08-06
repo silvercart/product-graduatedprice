@@ -26,10 +26,15 @@ class SilvercartGraduatedPrice extends DataObject {
     );
     
     public static $many_many = array(
-        'Groups' => 'Group'
+        'CustomerGroups' => 'Group'
+    );
+    
+    public static $casting = array(
+        'PriceFormatted'       => 'VarChar(20)',
+        'GroupsNamesFormatted' => 'VarChar()'
     );
 
-        /**
+    /**
      * Returns the translated singular name of the object. If no translation exists
      * the class name will be returned.
      * 
@@ -63,5 +68,80 @@ class SilvercartGraduatedPrice extends DataObject {
         }   
     }
     
+    public function fieldLabels() {
+        $fieldLabels = array_merge(
+                parent::fieldLabels(),
+                array(
+                    'price' => _t('SilvercartGraduatedprice.PRICE'),
+                    'minimumQuantity' => _t('SilvercartGraduatedprice.MINIMUMQUANTITY'),
+                    'SilvercartProduct' => _t('SilvercartProduct.SINGULARNAME'),
+                    'CustomerGroups' => _t('Group.PLURALNAME')
+                    )
+                );
+        $this->extend('updateFieldLabels', $fieldLabels);
+        return $fieldLabels;
+    }
+    
+    public function summaryFields() {
+        $summaryFields = array(
+            'minimumQuantity'      => _t('SilvercartGraduatedprice.MINIMUMQUANTITY'),
+            'PriceFormatted'       => _t('SilvercartGraduatedprice.PRICE'),
+            'GroupsNamesFormatted' => _t('Group.PLURALNAME')
+            
+        );
+        $this->extend('updateSummaryFields', $summaryFields);
+        return $summaryFields;
+    }
+    
+    /**
+     * define CMS fields
+     *
+     * @param array $params See {@link scaffoldFormFields()}
+     *
+     * @return FieldSet
+     * 
+     * @author Roland Lehmann <rlehmann@pixeltricks.de>
+     * @since 6.8.2011
+     */
+    public function getCMSFields($params = null) {
+        $fields = parent::getCMSFields($params);
+        $fields->removeByName('CustomerGroups');
+        $groupsTable = new ManyManyComplexTableField($this, 'CustomerGroups', 'Group');
+        $fields->addFieldToTab('Root.' . _t('Group.PLURALNAME'), $groupsTable);
+        $this->extend('updateCMSFields', $fields);
+        return $fields;
+    }
+    
+    /**
+     * Returns the Price formatted by locale.
+     *
+     * @return string
+     *
+     * @author Sascha Koehler <skoehler@pixeltricks.de>
+     * @copyright 2011 pixeltricks GmbH
+     * @since 31.01.2011
+     */
+    public function PriceFormatted() {
+        return $this->price->Nice();
+    }
+    
+    /**
+     * helper for summary fields
+     * 
+     * @return string concatination of all assigned groups names seperated by /
+     * 
+     * @author Roland Lehmann <rlehmann@pixeltricks.de>
+     * @since 6.8.2011
+     */
+    public function GroupsNamesFormatted() {
+        $groups = $this->CustomerGroups();
+        $groupsNamesFormatted = "";
+        if ($groups) {
+            foreach ($groups as $group) {
+                $groupsNamesFormatted .= $group->getField('Title') . "/";
+            }
+        }
+        return $groupsNamesFormatted;
+    }
 }
 
