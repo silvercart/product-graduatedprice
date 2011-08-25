@@ -13,22 +13,48 @@
  */
 class SilvercartGraduatedPrice extends DataObject {
     
-    public static $singular_name = "graduated price";
-    public static $plural_name = "graduated prices";
-    
+    /**
+     * sapphire class attributes for ORM
+     * 
+     * @var array 
+     */
     public static $db = array(
         'price' => 'Money', //price for a single position
         'minimumQuantity' => 'Int'
     );
     
+    /**
+     * 1:1 or 1:n relationships.
+     *
+     * @var array
+     * 
+     * @author Roland Lehmann <rlehmann@pixeltricks.de>
+     * @since DD.MM.2011
+     */
     public static $has_one = array(
         'SilvercartProduct' => 'SilvercartProduct'
     );
     
+    /**
+     * n:m relationships.
+     *
+     * @var array
+     * 
+     * @author Roland Lehmann <rlehmann@pixeltricks.de>
+     * @since 23.08.2011
+     */
     public static $many_many = array(
         'CustomerGroups' => 'Group'
     );
-    
+
+    /**
+     * cast the return values of methods to attributes
+     * 
+     * @var array 
+     * 
+     * @author Roland Lehmann <rlehmann@pixeltricks.de>
+     * @since 23.08.2011
+     */
     public static $casting = array(
         'PriceFormatted'       => 'VarChar(20)',
         'GroupsNamesFormatted' => 'VarChar()'
@@ -68,9 +94,20 @@ class SilvercartGraduatedPrice extends DataObject {
         }   
     }
     
-    public function fieldLabels() {
+    /**
+     * Field labels for display in tables.
+     *
+     * @param boolean $includerelations A boolean value to indicate if the labels returned include relation fields
+     *
+     * @return array
+     *
+     * @author Roland Lehmann <rlehmann@pixeltricks.de>
+     * @copyright 2011 pixeltricks GmbH
+     * @since 23.08.2011
+     */
+    public function fieldLabels($includerelations = true) {
         $fieldLabels = array_merge(
-                parent::fieldLabels(),
+                parent::fieldLabels($includerelations),
                 array(
                     'price' => _t('SilvercartGraduatedprice.PRICE'),
                     'minimumQuantity' => _t('SilvercartGraduatedprice.MINIMUMQUANTITY'),
@@ -82,6 +119,15 @@ class SilvercartGraduatedPrice extends DataObject {
         return $fieldLabels;
     }
     
+    /**
+     * Summaryfields for display in tables.
+     *
+     * @return array
+     *
+     * @author Roland Lehmann <rlehmann@pixeltricks.de>
+     * @copyright 2011 pixeltricks GmbH
+     * @since 23.08.2011
+     */
     public function summaryFields() {
         $summaryFields = array(
             'minimumQuantity'      => _t('SilvercartGraduatedprice.MINIMUMQUANTITY'),
