@@ -34,24 +34,25 @@ class SilvercartProductGraduatedpriceDecorator extends DataObjectDecorator {
      * a price range is found for the customer class or false if no price range
      * exists.
      * 
-     * @return array|false 
+     * @param Money &$price the return value of the decorated method passed by reference
+     * 
+     * @return void 
      * 
      * @author Roland Lehmann <rlehmann@pixeltricks.de>
      * @since 3.8.2011
      */
-    public function updatePrice() {
+    public function updatePrice(Money &$price) {
         $customerPrice = $this->owner->getGraduatedPriceForCustomersGroups();
         $grouplessPrice = $this->owner->getGraduatedPriceWithoutGroup();
         if ($customerPrice) {
             if ($grouplessPrice && $grouplessPrice->price->getAmount() < $customerPrice->price->getAmount()) {
-                return $grouplessPrice->price;
+                $price = $grouplessPrice->price;
             } else {
-                return $customerPrice->price;
+                $price = $customerPrice->price;
             }
         } elseif ($grouplessPrice) {
-            return $grouplessPrice->price;
+            $price = $grouplessPrice->price;
         }
-        return false;
     }
     
     /**
