@@ -56,6 +56,24 @@ class SilvercartProductGraduatedpriceDecorator extends DataObjectDecorator {
     }
     
     /**
+     * Add the new relations fields to the CMS fields
+     *
+     * @param FieldSet &$CMSFields the field set passed by reference
+     * 
+     * @return void
+     * 
+     * @author Roland Lehmann <rlehmann@pixeltricks.de>
+     * @since 04.09.2011
+     */
+    public function updateCMSFields(FieldSet &$CMSFields) {
+        parent::updateCMSFields($CMSFields);
+        $mainTab = $CMSFields->findOrMakeTab('Root.Main');
+        $mainTab->push(new Tab('GraduatedPrices'));
+        $graduatedPricesTable = new HasManyComplexTableField($this->owner, 'SilvercartGraduatedPrices', 'SilvercartGraduatedPrice', null, null, $sourceFilter = "SilvercartProductID =".$this->owner->ID);
+        $CMSFields->addFieldToTab('Root.Main.GraduatedPrices', $graduatedPricesTable);
+    }
+
+    /**
      * Calculates the most convenient price
      * Selects all graduated prices for a customers groups that fit the $quantity.
      * 
