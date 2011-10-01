@@ -33,7 +33,7 @@ if (array_key_exists('en_GB', $lang) && is_array($lang['en_GB'])) {
     $lang['en_GB'] = $lang['en_US'];
 }
 
-$lang['en_GB']['SilvercartGraduatedprice']['PLURALNAME'] = 'graduated price';
-$lang['en_GB']['SilvercartGraduatedprice']['SINGULARNAME'] = 'graduated price';
-$lang['en_GB']['SilvercartGraduatedprice']['PRICE'] = 'price';
-$lang['en_GB']['SilvercartGraduatedprice']['MINIMUMQUANTITY'] = 'minimum quantity';
+$lang['en_GB']['SilvercartGraduatedPrice']['PLURALNAME'] = 'graduated price';
+$lang['en_GB']['SilvercartGraduatedPrice']['SINGULARNAME'] = 'graduated price';
+$lang['en_GB']['SilvercartGraduatedPrice']['PRICE'] = 'price';
+$lang['en_GB']['SilvercartGraduatedPrice']['MINIMUMQUANTITY'] = 'minimum quantity';

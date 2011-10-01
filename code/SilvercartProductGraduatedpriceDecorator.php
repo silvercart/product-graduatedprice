@@ -68,7 +68,9 @@ class SilvercartProductGraduatedpriceDecorator extends DataObjectDecorator {
     public function updateCMSFields(FieldSet &$CMSFields) {
         parent::updateCMSFields($CMSFields);
         $mainTab = $CMSFields->findOrMakeTab('Root.Main');
-        $mainTab->push(new Tab('GraduatedPrices'));
+        $graduatedPricesTab = new Tab('GraduatedPrices');
+        $graduatedPricesTab->setTitle(_t('SilvercartGraduatedPrice.PLURALNAME'));
+        $mainTab->push($graduatedPricesTab);
         $graduatedPricesTable = new HasManyComplexTableField($this->owner, 'SilvercartGraduatedPrices', 'SilvercartGraduatedPrice', null, null, $sourceFilter = "SilvercartProductID =".$this->owner->ID);
         $CMSFields->addFieldToTab('Root.Main.GraduatedPrices', $graduatedPricesTable);
     }

@@ -33,7 +33,7 @@ if (array_key_exists('de_DE', $lang) && is_array($lang['de_DE'])) {
     $lang['de_DE'] = $lang['en_US'];
 }
 
-$lang['de_DE']['SilvercartGraduatedprice']['PLURALNAME'] = 'Preisstaffeln';
-$lang['de_DE']['SilvercartGraduatedprice']['SINGULARNAME'] = 'Preisstaffel';
-$lang['de_DE']['SilvercartGraduatedprice']['PRICE'] = 'Preis';
-$lang['de_DE']['SilvercartGraduatedprice']['MINIMUMQUANTITY'] = 'Mindestanzahl';
+$lang['de_DE']['SilvercartGraduatedPrice']['PLURALNAME'] = 'Preisstaffeln';
+$lang['de_DE']['SilvercartGraduatedPrice']['SINGULARNAME'] = 'Preisstaffel';
+$lang['de_DE']['SilvercartGraduatedPrice']['PRICE'] = 'Preis';
+$lang['de_DE']['SilvercartGraduatedPrice']['MINIMUMQUANTITY'] = 'Mindestanzahl';
