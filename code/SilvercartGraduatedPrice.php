@@ -19,7 +19,7 @@ class SilvercartGraduatedPrice extends DataObject {
      * @var array 
      */
     public static $db = array(
-        'price' => 'Money', //price for a single position
+        'price' => 'Money', //price for a single product
         'minimumQuantity' => 'Int'
     );
     
@@ -109,8 +109,8 @@ class SilvercartGraduatedPrice extends DataObject {
         $fieldLabels = array_merge(
                 parent::fieldLabels($includerelations),
                 array(
-                    'price' => _t('SilvercartGraduatedprice.PRICE'),
-                    'minimumQuantity' => _t('SilvercartGraduatedprice.MINIMUMQUANTITY'),
+                    'price' => _t('SilvercartGraduatedPrice.PRICE'),
+                    'minimumQuantity' => _t('SilvercartGraduatedPrice.MINIMUMQUANTITY'),
                     'SilvercartProduct' => _t('SilvercartProduct.SINGULARNAME'),
                     'CustomerGroups' => _t('Group.PLURALNAME')
                     )
@@ -130,8 +130,8 @@ class SilvercartGraduatedPrice extends DataObject {
      */
     public function summaryFields() {
         $summaryFields = array(
-            'minimumQuantity'      => _t('SilvercartGraduatedprice.MINIMUMQUANTITY'),
-            'PriceFormatted'       => _t('SilvercartGraduatedprice.PRICE'),
+            'minimumQuantity'      => _t('SilvercartGraduatedPrice.MINIMUMQUANTITY'),
+            'PriceFormatted'       => _t('SilvercartGraduatedPrice.PRICE'),
             'GroupsNamesFormatted' => _t('Group.PLURALNAME')
             
         );
@@ -157,6 +157,18 @@ class SilvercartGraduatedPrice extends DataObject {
         $fields->addFieldToTab('Root.' . _t('Group.PLURALNAME'), $groupsTable);
         $this->extend('updateCMSFields', $fields);
         return $fields;
+    }
+    
+    /**
+     * Returns the requirements for the ModelAdmins popup
+     *
+     * @return void
+     * 
+     * @author Roland Lehmann <rlehmann@pixeltricks.de>
+     * @since 18.11.2011
+     */
+    public function getRequirementsForPopup() {
+        Requirements::css('silvercart_graduatedprice/css/SilvercartGraduatedPrice.css');
     }
     
     /**

@@ -79,7 +79,7 @@ class SilvercartProductGraduatedpriceDecorator extends DataObjectDecorator {
      * Calculates the most convenient price
      * Selects all graduated prices for a customers groups that fit the $quantity.
      * 
-     * @return SilvercartGraduatedprice|false
+     * @return SilvercartGraduatedPrice|false
      * 
      * @author Roland Lehmann <rlehmann@pixeltricks.de>
      * @since 6.8.2011 
@@ -111,7 +111,7 @@ class SilvercartProductGraduatedpriceDecorator extends DataObjectDecorator {
      * Returns a graduated price without checking the customers groups.
      * Only graduated prices without any group assigned are considered.
      * 
-     * @return SilvercartGraduatedprice|false
+     * @return SilvercartGraduatedPrice|false
      * 
      * @author Roland Lehmann <rlehmann@pixeltricks.de>
      * @since 6.8.2011

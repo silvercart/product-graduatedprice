@@ -19,7 +19,7 @@
  *
  * English (GB) language pack
  *
- * @package SilvercartGraduatedprice
+ * @package SilvercartGraduatedPrice
  * @subpackage i18n
  * @ignore
  */
