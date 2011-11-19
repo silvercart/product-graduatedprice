@@ -23,7 +23,7 @@
  * @subpackage i18n
  * @ignore
  */
-i18n::include_locale_file('silvercart_graduatedprice', 'en_US');
+i18n::include_locale_file('silvercart_product_graduatedprice', 'en_US');
 
 global $lang;
 

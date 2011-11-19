@@ -30,9 +30,8 @@ class SilvercartProductGraduatedpriceDecorator extends DataObjectDecorator {
     }
     
     /**
-     * decorates the price getter of SilvercartProduct. If it returns a Money if
-     * a price range is found for the customer class or false if no price range
-     * exists.
+     * decorates the price getter of SilvercartProduct. It updates a products price if
+     * a price range is found for the customer class.
      * 
      * @param Money &$price the return value of the decorated method passed by reference
      * 
@@ -43,16 +42,9 @@ class SilvercartProductGraduatedpriceDecorator extends DataObjectDecorator {
      */
     public function updatePrice(Money &$price) {
         $customerPrice = $this->owner->getGraduatedPriceForCustomersGroups();
-        $grouplessPrice = $this->owner->getGraduatedPriceWithoutGroup();
         if ($customerPrice) {
-            if ($grouplessPrice && $grouplessPrice->price->getAmount() < $customerPrice->price->getAmount()) {
-                $price = $grouplessPrice->price;
-            } else {
                 $price = $customerPrice->price;
             }
-        } elseif ($grouplessPrice) {
-            $price = $grouplessPrice->price;
-        }
     }
     
     /**
@@ -67,19 +59,28 @@ class SilvercartProductGraduatedpriceDecorator extends DataObjectDecorator {
      */
     public function updateCMSFields(FieldSet &$CMSFields) {
         parent::updateCMSFields($CMSFields);
-        $mainTab = $CMSFields->findOrMakeTab('Root.Main');
+        
+        
         $graduatedPricesTab = new Tab('GraduatedPrices');
         $graduatedPricesTab->setTitle(_t('SilvercartGraduatedPrice.PLURALNAME'));
-        $mainTab->push($graduatedPricesTab);
+        
         $graduatedPricesTable = new HasManyComplexTableField($this->owner, 'SilvercartGraduatedPrices', 'SilvercartGraduatedPrice', null, null, $sourceFilter = "SilvercartProductID =".$this->owner->ID);
-        $CMSFields->addFieldToTab('Root.Main.GraduatedPrices', $graduatedPricesTable);
+        if (SilvercartConfig::DisplayTypeOfProductAdminFlat()) {
+            $CMSFields->removeByName('SilvercartGraduatedPrices');
+            $CMSFields->findOrMakeTab('Root.GraduatedPrices', _t('SilvercartGraduatedPrice.PLURALNAME'));
+            $CMSFields->addFieldToTab('Root.GraduatedPrices', $graduatedPricesTable);
+        } else {
+            $mainTab = $CMSFields->findOrMakeTab('Root.Main');
+            $mainTab->push($graduatedPricesTab);
+            $CMSFields->addFieldToTab('Root.Main.GraduatedPrices', $graduatedPricesTable);
+        }
     }
 
     /**
      * Calculates the most convenient price
      * Selects all graduated prices for a customers groups that fit the $quantity.
      * 
-     * @return SilvercartGraduatedPrice|false
+     * @return SilvercartGraduatedPrice|false the most convenient price
      * 
      * @author Roland Lehmann <rlehmann@pixeltricks.de>
      * @since 6.8.2011 
@@ -102,28 +103,6 @@ class SilvercartProductGraduatedpriceDecorator extends DataObjectDecorator {
                     $graduatedPricesForMembersGroups->sort('priceAmount', "ASC");
                     return $graduatedPricesForMembersGroups->First();
                 }
-            }
-        }
-        return false;
-    }
-    
-    /**
-     * Returns a graduated price without checking the customers groups.
-     * Only graduated prices without any group assigned are considered.
-     * 
-     * @return SilvercartGraduatedPrice|false
-     * 
-     * @author Roland Lehmann <rlehmann@pixeltricks.de>
-     * @since 6.8.2011
-     */
-    public function getGraduatedPriceWithoutGroup() {
-        $member = Member::currentUser();
-        $quantity = $this->owner->getProductQuantityInCart();
-        if ($member) {
-            $whereClause = sprintf("`SilvercartProductID` = '%s' AND `minimumQuantity` <= '%d'", $this->owner->ID, $quantity);
-            $graduatedPrices = DataObject::get('SilvercartGraduatedPrice', $whereClause, "priceAmount ASC");
-            if ($graduatedPrices) {
-                return $graduatedPrices->First();
             }
         }
         return false;

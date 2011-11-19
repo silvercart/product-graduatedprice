@@ -168,7 +168,7 @@ class SilvercartGraduatedPrice extends DataObject {
      * @since 18.11.2011
      */
     public function getRequirementsForPopup() {
-        Requirements::css('silvercart_graduatedprice/css/SilvercartGraduatedPrice.css');
+        Requirements::css('silvercart_product_graduatedprice/css/SilvercartGraduatedPrice.css');
     }
     
     /**
