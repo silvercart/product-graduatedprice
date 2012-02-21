@@ -152,9 +152,16 @@ class SilvercartGraduatedPrice extends DataObject {
     public function getCMSFields($params = null) {
         $fields = parent::getCMSFields($params);
         $fields->removeByName('CustomerGroups');
-        $groupsTable = new TreeMultiselectField('CustomerGroups', _t('Group.PLURALNAME'));
-        $groupsTable->extraClass('customerGroupTreeDropdown');
-        $fields->addFieldToTab('Root.' . _t('Group.PLURALNAME'), $groupsTable);
+        $productID = $fields->dataFieldByName('SilvercartProductID')->Value();
+        $fields->removeByName('SilvercartProductID');
+        $fields->insertFirst(new HiddenField('SilvercartProductID', $title = null, $productID));
+        if ($this->ID > 0) {
+            $groupsTable = new TreeMultiselectField('CustomerGroups', _t('Group.PLURALNAME'));
+            $groupsTable->extraClass('customerGroupTreeDropdown');
+            $fields->addFieldToTab('Root.' . _t('Group.PLURALNAME'), $groupsTable);
+        }
+        
+        
         $this->extend('updateCMSFields', $fields);
         return $fields;
     }

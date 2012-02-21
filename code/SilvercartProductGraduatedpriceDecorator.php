@@ -2,7 +2,7 @@
 
 /**
  * Decorator for SilvercartProduct
- * Changes the behavior of price getters
+ * Overwrites the return value of the price getter.
  *
  * @package SilverCart
  * @subpackage GraduatedPrices
@@ -59,7 +59,6 @@ class SilvercartProductGraduatedpriceDecorator extends DataObjectDecorator {
      */
     public function updateCMSFields(FieldSet &$CMSFields) {
         parent::updateCMSFields($CMSFields);
-        
         
         $graduatedPricesTab = new Tab('GraduatedPrices');
         $graduatedPricesTab->setTitle(_t('SilvercartGraduatedPrice.PLURALNAME'));
