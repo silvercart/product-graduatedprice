@@ -41,10 +41,10 @@ class SilvercartProductGraduatedpriceDecorator extends DataObjectDecorator {
      * @since 3.8.2011
      */
     public function updatePrice(Money &$price) {
-        $customerPrice = $this->owner->getGraduatedPriceForCustomersGroups();
+        $customerPrice = $this->getGraduatedPriceForCustomersGroups();
         if ($customerPrice) {
-                $price = $customerPrice->price;
-            }
+            $price = $customerPrice->price;
+        }
     }
     
     /**
@@ -94,7 +94,9 @@ class SilvercartProductGraduatedpriceDecorator extends DataObjectDecorator {
             if ($graduatedPrices) {
                 $graduatedPricesForMembersGroups = new DataObjectSet();
                 foreach ($graduatedPrices as $graduatedPrice) {
-                    if ($graduatedPrice->CustomerGroups() && $member->inGroups($graduatedPrice->CustomerGroups())) {
+                    if ($graduatedPrice->CustomerGroups() &&
+                        $graduatedPrice->CustomerGroups()->Count() > 0 &&
+                        $member->inGroups($graduatedPrice->CustomerGroups())) {
                         $graduatedPricesForMembersGroups->push($graduatedPrice);
                     }
                 }

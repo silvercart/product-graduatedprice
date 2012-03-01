@@ -33,7 +33,8 @@ if (array_key_exists('de_DE', $lang) && is_array($lang['de_DE'])) {
     $lang['de_DE'] = $lang['en_US'];
 }
 
-$lang['de_DE']['SilvercartGraduatedPrice']['PLURALNAME'] = 'Preisstaffeln';
-$lang['de_DE']['SilvercartGraduatedPrice']['SINGULARNAME'] = 'Preisstaffel';
-$lang['de_DE']['SilvercartGraduatedPrice']['PRICE'] = 'Preis';
-$lang['de_DE']['SilvercartGraduatedPrice']['MINIMUMQUANTITY'] = 'Mindestanzahl';
+$lang['de_DE']['SilvercartGraduatedPrice']['PLURALNAME']                        = 'Preisstaffeln';
+$lang['de_DE']['SilvercartGraduatedPrice']['SINGULARNAME']                      = 'Preisstaffel';
+$lang['de_DE']['SilvercartGraduatedPrice']['PRICE']                             = 'Preis';
+$lang['de_DE']['SilvercartGraduatedPrice']['MINIMUMQUANTITY']                   = 'Mindestanzahl';
+$lang['de_DE']['SilvercartGraduatedPrice']['NO_GROUP_RELATED']                  = 'Es wurde noch keine Kundengruppe zugeordnet. Es muss mindestens eine Kundengruppe zugeordnet werden, damit der Preis verwendet werden kann.';

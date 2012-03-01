@@ -19,17 +19,14 @@ class SilvercartGraduatedPrice extends DataObject {
      * @var array 
      */
     public static $db = array(
-        'price' => 'Money', //price for a single product
-        'minimumQuantity' => 'Int'
+        'price'             => 'Money',
+        'minimumQuantity'   => 'Int'
     );
     
     /**
      * 1:1 or 1:n relationships.
      *
      * @var array
-     * 
-     * @author Roland Lehmann <rlehmann@pixeltricks.de>
-     * @since DD.MM.2011
      */
     public static $has_one = array(
         'SilvercartProduct' => 'SilvercartProduct'
@@ -39,9 +36,6 @@ class SilvercartGraduatedPrice extends DataObject {
      * n:m relationships.
      *
      * @var array
-     * 
-     * @author Roland Lehmann <rlehmann@pixeltricks.de>
-     * @since 23.08.2011
      */
     public static $many_many = array(
         'CustomerGroups' => 'Group'
@@ -50,14 +44,12 @@ class SilvercartGraduatedPrice extends DataObject {
     /**
      * cast the return values of methods to attributes
      * 
-     * @var array 
-     * 
-     * @author Roland Lehmann <rlehmann@pixeltricks.de>
-     * @since 23.08.2011
+     * @var array
      */
     public static $casting = array(
-        'PriceFormatted'       => 'VarChar(20)',
-        'GroupsNamesFormatted' => 'VarChar()'
+        'PriceFormatted'        => 'VarChar(20)',
+        'GroupsNamesFormatted'  => 'HTMLText',
+        'RelatedGroupIndicator' => 'HTMLText',
     );
 
     /**
@@ -109,12 +101,12 @@ class SilvercartGraduatedPrice extends DataObject {
         $fieldLabels = array_merge(
                 parent::fieldLabels($includerelations),
                 array(
-                    'price' => _t('SilvercartGraduatedPrice.PRICE'),
-                    'minimumQuantity' => _t('SilvercartGraduatedPrice.MINIMUMQUANTITY'),
+                    'price'             => _t('SilvercartGraduatedPrice.PRICE'),
+                    'minimumQuantity'   => _t('SilvercartGraduatedPrice.MINIMUMQUANTITY'),
                     'SilvercartProduct' => _t('SilvercartProduct.SINGULARNAME'),
-                    'CustomerGroups' => _t('Group.PLURALNAME')
-                    )
-                );
+                    'CustomerGroups'    => _t('Group.PLURALNAME'),
+                )
+        );
         $this->extend('updateFieldLabels', $fieldLabels);
         return $fieldLabels;
     }
@@ -130,10 +122,10 @@ class SilvercartGraduatedPrice extends DataObject {
      */
     public function summaryFields() {
         $summaryFields = array(
-            'minimumQuantity'      => _t('SilvercartGraduatedPrice.MINIMUMQUANTITY'),
-            'PriceFormatted'       => _t('SilvercartGraduatedPrice.PRICE'),
-            'GroupsNamesFormatted' => _t('Group.PLURALNAME')
-            
+            'RelatedGroupIndicator' => '&nbsp;',
+            'minimumQuantity'       => $this->fieldLabel('minimumQuantity'),
+            'PriceFormatted'        => $this->fieldLabel('price'),
+            'GroupsNamesFormatted'  => $this->fieldLabel('CustomerGroups'),
         );
         $this->extend('updateSummaryFields', $summaryFields);
         return $summaryFields;
@@ -145,9 +137,6 @@ class SilvercartGraduatedPrice extends DataObject {
      * @param array $params See {@link scaffoldFormFields()}
      *
      * @return FieldSet
-     * 
-     * @author Roland Lehmann <rlehmann@pixeltricks.de>
-     * @since 6.8.2011
      */
     public function getCMSFields($params = null) {
         $fields = parent::getCMSFields($params);
@@ -160,8 +149,6 @@ class SilvercartGraduatedPrice extends DataObject {
             $groupsTable->extraClass('customerGroupTreeDropdown');
             $fields->addFieldToTab('Root.' . _t('Group.PLURALNAME'), $groupsTable);
         }
-        
-        
         $this->extend('updateCMSFields', $fields);
         return $fields;
     }
@@ -170,9 +157,6 @@ class SilvercartGraduatedPrice extends DataObject {
      * Returns the requirements for the ModelAdmins popup
      *
      * @return void
-     * 
-     * @author Roland Lehmann <rlehmann@pixeltricks.de>
-     * @since 18.11.2011
      */
     public function getRequirementsForPopup() {
         Requirements::css('silvercart_product_graduatedprice/css/SilvercartGraduatedPrice.css');
@@ -182,12 +166,8 @@ class SilvercartGraduatedPrice extends DataObject {
      * Returns the Price formatted by locale.
      *
      * @return string
-     *
-     * @author Sascha Koehler <skoehler@pixeltricks.de>
-     * @copyright 2011 pixeltricks GmbH
-     * @since 31.01.2011
      */
-    public function PriceFormatted() {
+    public function getPriceFormatted() {
         return $this->price->Nice();
     }
     
@@ -195,19 +175,37 @@ class SilvercartGraduatedPrice extends DataObject {
      * helper for summary fields
      * 
      * @return string concatination of all assigned groups names seperated by /
-     * 
-     * @author Roland Lehmann <rlehmann@pixeltricks.de>
-     * @since 6.8.2011
      */
-    public function GroupsNamesFormatted() {
+    public function getGroupsNamesFormatted() {
         $groups = $this->CustomerGroups();
         $groupsNamesFormatted = "";
-        if ($groups) {
-            foreach ($groups as $group) {
-                $groupsNamesFormatted .= $group->getField('Title') . "/";
-            }
+        if ($groups->Count() > 0) {
+            $groupsNamesFormatted = implode(' / ', $groups->map('ID', 'Title'));
+        } else {
+            $groupsNamesFormatted = sprintf(
+                '<strong style="color: red;">%s</strong>',
+                _t('SilvercartGraduatedPrice.NO_GROUP_RELATED')
+            );
         }
         return $groupsNamesFormatted;
+    }
+    
+    /**
+     * Checks whether a customer group is related or not. If not, the graduated
+     * price is out of function and won't be used in any case. At least one 
+     * customer group has to be related to have a working graduated price
+     *
+     * @return string
+     */
+    public function getRelatedGroupIndicator() {
+        $indicatorColor = 'red';
+        if ($this->CustomerGroups()->Count() > 0) {
+            $indicatorColor = 'green';
+        }
+        return sprintf(
+                '<div style="background-color: %s;">&nbsp;</div>',
+                $indicatorColor
+        );
     }
 }
 

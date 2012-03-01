@@ -27,7 +27,14 @@
 
 global $lang;
 
-$lang['en_US']['SilvercartGraduatedPrice']['PLURALNAME'] = 'graduated prices';
-$lang['en_US']['SilvercartGraduatedPrice']['SINGULARNAME'] = 'graduated price';
-$lang['en_US']['SilvercartGraduatedPrice']['PRICE'] = 'price';
-$lang['en_US']['SilvercartGraduatedPrice']['MINIMUMQUANTITY'] = 'minimum quantity';
+
+
+
+
+
+
+$lang['en_US']['SilvercartGraduatedPrice']['PLURALNAME']                        = 'graduated prices';
+$lang['en_US']['SilvercartGraduatedPrice']['SINGULARNAME']                      = 'graduated price';
+$lang['en_US']['SilvercartGraduatedPrice']['PRICE']                             = 'price';
+$lang['en_US']['SilvercartGraduatedPrice']['MINIMUMQUANTITY']                   = 'minimum quantity';
+$lang['en_US']['SilvercartGraduatedPrice']['NO_GROUP_RELATED']                  = 'No related customer group found! There must be at least one related customer group to use this price!';
