@@ -1,3 +1,3 @@
 <?php
-Object::add_extension('SilvercartProduct', 'SilvercartProductGraduatedpriceDecorator');
-Object::add_extension('Group', 'SilvercartGraduatedpriceGroupDecorator');
+Object::add_extension('SilvercartProduct',  'SilvercartGraduatedPriceProduct');
+Object::add_extension('Group',              'SilvercartGraduatedPriceGroupDecorator');

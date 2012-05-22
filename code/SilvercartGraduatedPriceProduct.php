@@ -1,4 +1,25 @@
 <?php
+/**
+ * Copyright 2012 pixeltricks GmbH
+ *
+ * This file is part of SilverCart.
+ *
+ * SilverCart is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * SilverCart is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with SilverCart.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @package Silvercart
+ * @subpackage GraduatedPrices
+ */
 
 /**
  * Decorator for SilvercartProduct
@@ -6,12 +27,12 @@
  *
  * @package SilverCart
  * @subpackage GraduatedPrices
- * @author Roland Lehmann <rlehmann@pixeltricks.de>
- * @copyright Pixeltricks GmbH
- * @since 03.08.2011
+ * @author Roland Lehmann <rlehmann@pixeltricks.de>, Sebastian Diel <sdiel@pixeltricks.de>
+ * @copyright pixeltricks GmbH
+ * @since 22.05.2012
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License
  */
-class SilvercartProductGraduatedpriceDecorator extends DataObjectDecorator {
+class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
     
     /**
      * adds attributes and relations
@@ -50,29 +71,39 @@ class SilvercartProductGraduatedpriceDecorator extends DataObjectDecorator {
     /**
      * Add the new relations fields to the CMS fields
      *
-     * @param FieldSet &$CMSFields the field set passed by reference
+     * @param FieldSet &$fields the field set passed by reference
      * 
      * @return void
      * 
      * @author Roland Lehmann <rlehmann@pixeltricks.de>
      * @since 04.09.2011
      */
-    public function updateCMSFields(FieldSet &$CMSFields) {
-        parent::updateCMSFields($CMSFields);
-        
-        $graduatedPricesTab = new Tab('GraduatedPrices');
-        $graduatedPricesTab->setTitle(_t('SilvercartGraduatedPrice.PLURALNAME'));
-        
-        $graduatedPricesTable = new HasManyComplexTableField($this->owner, 'SilvercartGraduatedPrices', 'SilvercartGraduatedPrice', null, null, $sourceFilter = "SilvercartProductID =".$this->owner->ID);
-        if (SilvercartConfig::DisplayTypeOfProductAdminFlat()) {
-            $CMSFields->removeByName('SilvercartGraduatedPrices');
-            $CMSFields->findOrMakeTab('Root.GraduatedPrices', _t('SilvercartGraduatedPrice.PLURALNAME'));
-            $CMSFields->addFieldToTab('Root.GraduatedPrices', $graduatedPricesTable);
-        } else {
-            $mainTab = $CMSFields->findOrMakeTab('Root.Main');
-            $mainTab->push($graduatedPricesTab);
-            $CMSFields->addFieldToTab('Root.Main.GraduatedPrices', $graduatedPricesTable);
+    public function updateCMSFields(FieldSet &$fields) {
+        if ($this->owner->ID) {
+            $graduatedPrices = $fields->dataFieldByName('SilvercartGraduatedPrices');
+            $root = $fields->findOrMakeTab('Root');
+            $root->removeByName('SilvercartGraduatedPrices');
+            $fields->addFieldToTab('Root.Prices', $graduatedPrices);
         }
+    }
+    
+    /**
+     * Updates the field labels
+     *
+     * @param array &$labels Labels to update
+     * 
+     * @return void
+     * 
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 16.05.2012
+     */
+    public function updateFieldLabels(&$labels) {
+        $labels = array_merge(
+                $labels,
+                array(
+                    'SilvercartGraduatedPrices' => _t('SilvercartGraduatedPrice.PLURALNAME'),
+                )
+        );
     }
 
     /**

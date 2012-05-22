@@ -1,4 +1,25 @@
 <?php
+/**
+ * Copyright 2012 pixeltricks GmbH
+ *
+ * This file is part of SilverCart.
+ *
+ * SilverCart is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * SilverCart is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with SilverCart.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @package Silvercart
+ * @subpackage GraduatedPrices
+ */
 
 /**
  * abstract for price ranges
@@ -6,9 +27,9 @@
  *
  * @package SilverCart
  * @subpackage GraduatedPrices
- * @author Roland Lehmann <rlehmann@pixeltricks.de>
- * @copyright Pixeltricks GmbH
- * @since 03.08.2011
+ * @author Roland Lehmann <rlehmann@pixeltricks.de>, Sebastian Diel <sdiel@pixeltricks.de>
+ * @copyright pixeltricks GmbH
+ * @since 22.05.2012
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License
  */
 class SilvercartGraduatedPrice extends DataObject {
@@ -58,15 +79,11 @@ class SilvercartGraduatedPrice extends DataObject {
      * 
      * @return string The objects singular name 
      * 
-     * @author Roland Lehmann <rlehmann@pixeltricks.de>
-     * @since 5.7.2011
+     * @author Roland Lehmann <rlehmann@pixeltricks.de>, Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 22.05.2012
      */
     public function singular_name() {
-        if (_t('SilvercartGraduatedPrice.SINGULARNAME')) {
-            return _t('SilvercartGraduatedPrice.SINGULARNAME');
-        } else {
-            return parent::singular_name();
-        } 
+        return SilvercartTools::singular_name_for($this);
     }
     
     /**
@@ -75,15 +92,11 @@ class SilvercartGraduatedPrice extends DataObject {
      * 
      * @return string the objects plural name
      * 
-     * @author Roland Lehmann <rlehmann@pixeltricks.de>
-     * @since 5.7.2011 
+     * @author Roland Lehmann <rlehmann@pixeltricks.de>, Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 22.05.2012
      */
     public function plural_name() {
-        if (_t('SilvercartGraduatedPrice.PLURALNAME')) {
-            return _t('SilvercartGraduatedPrice.PLURALNAME');
-        } else {
-            return parent::plural_name();
-        }   
+        return SilvercartTools::plural_name_for($this);
     }
     
     /**
@@ -139,7 +152,16 @@ class SilvercartGraduatedPrice extends DataObject {
      * @return FieldSet
      */
     public function getCMSFields($params = null) {
-        $fields = parent::getCMSFields($params);
+        $fields = parent::getCMSFields(
+                array_merge(
+                        array(
+                            'fieldClasses' => array(
+                                'price' => 'SilvercartMoneyField',
+                            ),
+                        ),
+                        (array)$params
+                )
+        );
         $fields->removeByName('CustomerGroups');
         $productID = $fields->dataFieldByName('SilvercartProductID')->Value();
         $fields->removeByName('SilvercartProductID');
@@ -147,7 +169,8 @@ class SilvercartGraduatedPrice extends DataObject {
         if ($this->ID > 0) {
             $groupsTable = new TreeMultiselectField('CustomerGroups', _t('Group.PLURALNAME'));
             $groupsTable->extraClass('customerGroupTreeDropdown');
-            $fields->addFieldToTab('Root.' . _t('Group.PLURALNAME'), $groupsTable);
+            $fields->findOrMakeTab('Root.CustomerGroups', $this->fieldLabel('CustomerGroups'));
+            $fields->addFieldToTab('Root.CustomerGroups', $groupsTable);
         }
         $this->extend('updateCMSFields', $fields);
         return $fields;
