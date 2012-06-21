@@ -147,19 +147,22 @@ class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
      * 
      * @return integer
      * 
-     * @author Roland Lehmann <rlehmann@pixeltricks.de>
-     * @since 6.8.2011 
+     * @author Roland Lehmann <rlehmann@pixeltricks.de>, Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 21.06.2012
      */
     public function getProductQuantityInCart() {
-        $member = Member::currentUser();
-        if ($member && $member->getCart()) {
-            $whereClause = sprintf("`SilvercartProductID` = '%s' AND `SilvercartShoppingCartID` = '%s'", $this->owner->ID, $member->getCart()->ID);
-            $position = DataObject::get_one('SilvercartShoppingcartPosition', $whereClause);
+        $quantity   = 1;
+        $member     = Member::currentUser();
+        if ($member &&
+            $member->SilvercartShoppingCartID > 0) {
+            $whereClause    = sprintf("`SilvercartProductID` = '%s' AND `SilvercartShoppingCartID` = '%s'", $this->owner->ID, $member->SilvercartShoppingCartID);
+            $position       = DataObject::get_one('SilvercartShoppingcartPosition', $whereClause);
             if ($position) {
-                return $position->Quantity;
+                $quantity = $position->Quantity;
             }
         }
-        return 1;
+        return $quantity;
     }
+    
 }
 
