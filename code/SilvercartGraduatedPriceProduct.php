@@ -33,7 +33,23 @@
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License
  */
 class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
-    
+
+    /**
+     * Cache for method "getGraduatedPriceForCustomersGroups".
+     *
+     * @var DataObjectSet
+     * @since 30.10.2012
+     */
+    protected $graduatedPriceForCustomersGroups = null;
+
+    /**
+     * Cache for method "getGraduatedPricesForCustomersGroups".
+     *
+     * @var DataObjectSet
+     * @since 30.10.2012
+     */
+    protected $graduatedPricesForCustomersGroups = null;
+
     /**
      * adds attributes and relations
      * 
@@ -116,28 +132,73 @@ class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
      * @since 6.8.2011 
      */
     public function getGraduatedPriceForCustomersGroups() {
-        $member = Member::currentUser();
-        $quantity = $this->owner->getProductQuantityInCart();
-        if ($member) {
-            $whereClause = sprintf("`SilvercartProductID` = '%s' AND `minimumQuantity` <= '%d'", $this->owner->ID, $quantity);
-            $graduatedPrices = DataObject::get('SilvercartGraduatedPrice', $whereClause);
-            
-            if ($graduatedPrices) {
-                $graduatedPricesForMembersGroups = new DataObjectSet();
-                foreach ($graduatedPrices as $graduatedPrice) {
-                    if ($graduatedPrice->CustomerGroups() &&
-                        $graduatedPrice->CustomerGroups()->Count() > 0 &&
-                        $member->inGroups($graduatedPrice->CustomerGroups())) {
-                        $graduatedPricesForMembersGroups->push($graduatedPrice);
+        if ($this->graduatedPriceForCustomersGroups === null) {
+            $member   = Member::currentUser();
+            $quantity = $this->owner->getProductQuantityInCart();
+            $price    = false;
+
+            if ($member) {
+                $whereClause = sprintf("`SilvercartProductID` = '%s' AND `minimumQuantity` <= '%d'", $this->owner->ID, $quantity);
+                $graduatedPrices = DataObject::get('SilvercartGraduatedPrice', $whereClause);
+
+                if ($graduatedPrices) {
+                    $graduatedPricesForMembersGroups = new DataObjectSet();
+                    foreach ($graduatedPrices as $graduatedPrice) {
+                        if ($graduatedPrice->CustomerGroups() &&
+                            $graduatedPrice->CustomerGroups()->Count() > 0 &&
+                            $member->inGroups($graduatedPrice->CustomerGroups())) {
+
+                            $graduatedPricesForMembersGroups->push($graduatedPrice);
+                        }
+                    }
+                    if ($graduatedPricesForMembersGroups) {
+                        $graduatedPricesForMembersGroups->sort('priceAmount', "ASC");
+                        $price = $graduatedPricesForMembersGroups->First();
                     }
                 }
-                if ($graduatedPricesForMembersGroups) {
-                    $graduatedPricesForMembersGroups->sort('priceAmount', "ASC");
-                    return $graduatedPricesForMembersGroups->First();
+            }
+            $this->graduatedPriceForCustomersGroups = $price;
+        }
+
+        return $this->graduatedPriceForCustomersGroups;
+    }
+
+    /**
+     * Returns all graduated prices for a customers groups.
+     *
+     * @return DataObjectSet
+     *
+     * @author Sascha Koehler <skoehler@pixeltricks.de>
+     * @since 30.10.2011
+     */
+    public function getGraduatedPricesForCustomersGroups() {
+        if ($this->graduatedPricesForCustomersGroups === null) {
+            $member                          = Member::currentUser();
+            $graduatedPricesForMembersGroups = new DataObjectSet();
+
+            if ($member) {
+                $whereClause     = sprintf("`SilvercartProductID` = '%s'", $this->owner->ID);
+                $graduatedPrices = DataObject::get('SilvercartGraduatedPrice', $whereClause, 'minimumQuantity ASC');
+
+                if ($graduatedPrices) {
+                    foreach ($graduatedPrices as $graduatedPrice) {
+                        if ($graduatedPrice->CustomerGroups() &&
+                            $graduatedPrice->CustomerGroups()->Count() > 0 &&
+                            $member->inGroups($graduatedPrice->CustomerGroups())) {
+
+                            $graduatedPricesForMembersGroups->push($graduatedPrice);
+                        }
+                    }
                 }
             }
+            $this->graduatedPricesForCustomersGroups = $graduatedPricesForMembersGroups;
         }
-        return false;
+
+        if ($this->graduatedPricesForCustomersGroups->Count() > 1) {
+            return $this->graduatedPricesForCustomersGroups;
+        } else {
+            return false;
+        }
     }
     
     /**
