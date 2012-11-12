@@ -175,11 +175,10 @@ class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
         if ($this->graduatedPricesForCustomersGroups === null) {
             $member                          = Member::currentUser();
             $graduatedPricesForMembersGroups = new DataObjectSet();
+            $whereClause                     = sprintf("`SilvercartProductID` = '%s'", $this->owner->ID);
+            $graduatedPrices                 = DataObject::get('SilvercartGraduatedPrice', $whereClause, 'minimumQuantity ASC');
 
             if ($member) {
-                $whereClause     = sprintf("`SilvercartProductID` = '%s'", $this->owner->ID);
-                $graduatedPrices = DataObject::get('SilvercartGraduatedPrice', $whereClause, 'minimumQuantity ASC');
-
                 if ($graduatedPrices) {
                     foreach ($graduatedPrices as $graduatedPrice) {
                         if ($graduatedPrice->CustomerGroups() &&
@@ -187,6 +186,18 @@ class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
                             $member->inGroups($graduatedPrice->CustomerGroups())) {
 
                             $graduatedPricesForMembersGroups->push($graduatedPrice);
+                        }
+                    }
+                }
+            } else {
+                if ($graduatedPrices) {
+                    foreach ($graduatedPrices as $graduatedPrice) {
+                        if ($graduatedPrice->CustomerGroups() &&
+                            $graduatedPrice->CustomerGroups()->Count() > 0) {
+
+                            if ($graduatedPrice->CustomerGroups()->find('Code', 'anonymous')) {
+                                $graduatedPricesForMembersGroups->push($graduatedPrice);
+                            }
                         }
                     }
                 }
