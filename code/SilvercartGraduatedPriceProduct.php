@@ -136,13 +136,12 @@ class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
             $member   = Member::currentUser();
             $quantity = $this->owner->getProductQuantityInCart();
             $price    = false;
+            $whereClause                     = sprintf("`SilvercartProductID` = '%s' AND `minimumQuantity` <= '%d'", $this->owner->ID, $quantity);
+            $graduatedPrices                 = DataObject::get('SilvercartGraduatedPrice', $whereClause);
+            $graduatedPricesForMembersGroups = new DataObjectSet();
 
             if ($member) {
-                $whereClause = sprintf("`SilvercartProductID` = '%s' AND `minimumQuantity` <= '%d'", $this->owner->ID, $quantity);
-                $graduatedPrices = DataObject::get('SilvercartGraduatedPrice', $whereClause);
-
                 if ($graduatedPrices) {
-                    $graduatedPricesForMembersGroups = new DataObjectSet();
                     foreach ($graduatedPrices as $graduatedPrice) {
                         if ($graduatedPrice->CustomerGroups() &&
                             $graduatedPrice->CustomerGroups()->Count() > 0 &&
@@ -154,6 +153,18 @@ class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
                     if ($graduatedPricesForMembersGroups) {
                         $graduatedPricesForMembersGroups->sort('priceAmount', "ASC");
                         $price = $graduatedPricesForMembersGroups->First();
+                    }
+                }
+            } else {
+                if ($graduatedPrices) {
+                    foreach ($graduatedPrices as $graduatedPrice) {
+                        if ($graduatedPrice->CustomerGroups() &&
+                            $graduatedPrice->CustomerGroups()->Count() > 0) {
+
+                            if ($graduatedPrice->CustomerGroups()->find('Code', 'anonymous')) {
+                                $graduatedPricesForMembersGroups->push($graduatedPrice);
+                            }
+                        }
                     }
                 }
             }
