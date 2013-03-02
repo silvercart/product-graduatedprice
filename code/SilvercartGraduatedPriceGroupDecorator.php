@@ -31,22 +31,15 @@
  * @since 22.05.2012
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License
  */
-class SilvercartGraduatedPriceGroupDecorator extends DataObjectDecorator {
+class SilvercartGraduatedPriceGroupDecorator extends DataExtension {
     
     /**
-     * adds attributes and relations
-     * 
-     * @return array
-     * 
-     * @author Roland Lehmann <rlehmann@pixeltricks.de>
-     * @since 3.8.2011 
+     * n:m relationships.
+     *
+     * @var array
      */
-    public function extraStatics() {
-        return array(
-            'belongs_many_many' => array(
-                'SilvercartGraduatedPrices' => 'SilvercartGraduatedPrice'
-            )
-        );
-    }
+    public static $belongs_many_many = array(
+        'SilvercartGraduatedPrices' => 'SilvercartGraduatedPrice'
+    );
 }
 

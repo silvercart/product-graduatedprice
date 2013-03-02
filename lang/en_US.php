@@ -24,14 +24,7 @@
  * @ignore
  */
 
-
 global $lang;
-
-
-
-
-
-
 
 $lang['en_US']['SilvercartGraduatedPrice']['PLURALNAME']                        = 'graduated prices';
 $lang['en_US']['SilvercartGraduatedPrice']['SINGULARNAME']                      = 'graduated price';

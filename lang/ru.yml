@@ -1,0 +1,7 @@
+ru:
+  SilvercartGraduatedPrice:
+    MINIMUMQUANTITY: "Минимальное количество"
+    NO_GROUP_RELATED: "Клиентская группа не определена. Минимум одна группа должна быть сделана для установки цены. "
+    PLURALNAME: "Ценовые группы"
+    PRICE: "Цена"
+    SINGULARNAME: "Ценовая группа"

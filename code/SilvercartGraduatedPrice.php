@@ -40,7 +40,7 @@ class SilvercartGraduatedPrice extends DataObject {
      * @var array 
      */
     public static $db = array(
-        'price'             => 'Money',
+        'price'             => 'SilvercartMoney',
         'minimumQuantity'   => 'Int'
     );
     
@@ -145,47 +145,6 @@ class SilvercartGraduatedPrice extends DataObject {
     }
     
     /**
-     * define CMS fields
-     *
-     * @param array $params See {@link scaffoldFormFields()}
-     *
-     * @return FieldSet
-     */
-    public function getCMSFields($params = null) {
-        $fields = parent::getCMSFields(
-                array_merge(
-                        array(
-                            'fieldClasses' => array(
-                                'price' => 'SilvercartMoneyField',
-                            ),
-                        ),
-                        (array)$params
-                )
-        );
-        $fields->removeByName('CustomerGroups');
-        $productID = $fields->dataFieldByName('SilvercartProductID')->Value();
-        $fields->removeByName('SilvercartProductID');
-        $fields->insertFirst(new HiddenField('SilvercartProductID', $title = null, $productID));
-        if ($this->ID > 0) {
-            $groupsTable = new TreeMultiselectField('CustomerGroups', _t('Group.PLURALNAME'));
-            $groupsTable->extraClass('customerGroupTreeDropdown');
-            $fields->findOrMakeTab('Root.CustomerGroups', $this->fieldLabel('CustomerGroups'));
-            $fields->addFieldToTab('Root.CustomerGroups', $groupsTable);
-        }
-        $this->extend('updateCMSFields', $fields);
-        return $fields;
-    }
-    
-    /**
-     * Returns the requirements for the ModelAdmins popup
-     *
-     * @return void
-     */
-    public function getRequirementsForPopup() {
-        Requirements::css('silvercart_product_graduatedprice/css/SilvercartGraduatedPrice.css');
-    }
-    
-    /**
      * Returns the Price formatted by locale.
      *
      * @return string
@@ -202,8 +161,8 @@ class SilvercartGraduatedPrice extends DataObject {
     public function getGroupsNamesFormatted() {
         $groups = $this->CustomerGroups();
         $groupsNamesFormatted = "";
-        if ($groups->Count() > 0) {
-            $groupsNamesFormatted = implode(' / ', $groups->map('ID', 'Title'));
+        if ($groups->exists()) {
+            $groupsNamesFormatted = implode(' / ', $groups->map()->toArray());
         } else {
             $groupsNamesFormatted = sprintf(
                 '<strong style="color: red;">%s</strong>',
@@ -222,7 +181,7 @@ class SilvercartGraduatedPrice extends DataObject {
      */
     public function getRelatedGroupIndicator() {
         $indicatorColor = 'red';
-        if ($this->CustomerGroups()->Count() > 0) {
+        if ($this->CustomerGroups()->exists()) {
             $indicatorColor = 'green';
         }
         return sprintf(

@@ -32,7 +32,7 @@
  * @since 22.05.2012
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License
  */
-class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
+class SilvercartGraduatedPriceProduct extends DataExtension {
 
     /**
      * Cache for method "getGraduatedPriceForCustomersGroups".
@@ -49,22 +49,15 @@ class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
      * @since 30.10.2012
      */
     protected $graduatedPricesForCustomersGroups = null;
-
+    
     /**
-     * adds attributes and relations
-     * 
-     * @return array
-     * 
-     * @author Roland Lehmann <rlehmann@pixeltricks.de>
-     * @since 3.8.2011 
+     * 1:n relationships.
+     *
+     * @var array
      */
-    public function extraStatics() {
-        return array(
-            'has_many' => array(
-                'SilvercartGraduatedPrices' => 'SilvercartGraduatedPrice'
-            )
-        );
-    }
+    public static $has_many = array(
+        'SilvercartGraduatedPrices' => 'SilvercartGraduatedPrice'
+    );
     
     /**
      * decorates the price getter of SilvercartProduct. It updates a products price if
@@ -77,7 +70,7 @@ class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
      * @author Roland Lehmann <rlehmann@pixeltricks.de>
      * @since 3.8.2011
      */
-    public function updatePrice(Money &$price) {
+    public function updatePrice(SilvercartMoney &$price) {
         $customerPrice = $this->getGraduatedPriceForCustomersGroups();
         if ($customerPrice) {
             $price = $customerPrice->price;
@@ -94,9 +87,10 @@ class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
      * @author Roland Lehmann <rlehmann@pixeltricks.de>
      * @since 04.09.2011
      */
-    public function updateCMSFields(FieldSet &$fields) {
-        if ($this->owner->ID) {
+    public function updateCMSFields(FieldList $fields) {
+        if ($this->owner->isInDB()) {
             $graduatedPrices = $fields->dataFieldByName('SilvercartGraduatedPrices');
+            $graduatedPrices->setConfig(SilvercartGridFieldConfig_LanguageRelationEditor::create());
             $root = $fields->findOrMakeTab('Root');
             $root->removeByName('SilvercartGraduatedPrices');
             $fields->addFieldToTab('Root.Prices', $graduatedPrices);
@@ -136,7 +130,7 @@ class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
             $member   = Member::currentUser();
             $quantity = $this->owner->getProductQuantityInCart();
             $price    = false;
-            $whereClause                     = sprintf("`SilvercartProductID` = '%s' AND `minimumQuantity` <= '%d'", $this->owner->ID, $quantity);
+            $whereClause                     = sprintf("\"SilvercartProductID\" = '%s' AND \"minimumQuantity\" <= '%d'", $this->owner->ID, $quantity);
             $graduatedPrices                 = DataObject::get('SilvercartGraduatedPrice', $whereClause);
             $graduatedPricesForMembersGroups = new DataObjectSet();
 
@@ -186,7 +180,7 @@ class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
         if ($this->graduatedPricesForCustomersGroups === null) {
             $member                          = Member::currentUser();
             $graduatedPricesForMembersGroups = new DataObjectSet();
-            $whereClause                     = sprintf("`SilvercartProductID` = '%s'", $this->owner->ID);
+            $whereClause                     = sprintf("\"SilvercartProductID\" = '%s'", $this->owner->ID);
             $graduatedPrices                 = DataObject::get('SilvercartGraduatedPrice', $whereClause, 'minimumQuantity ASC');
 
             if ($member) {
@@ -203,8 +197,7 @@ class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
             } else {
                 if ($graduatedPrices) {
                     foreach ($graduatedPrices as $graduatedPrice) {
-                        if ($graduatedPrice->CustomerGroups() &&
-                            $graduatedPrice->CustomerGroups()->Count() > 0) {
+                        if ($graduatedPrice->CustomerGroups()->exists()) {
 
                             if ($graduatedPrice->CustomerGroups()->find('Code', 'anonymous')) {
                                 $graduatedPricesForMembersGroups->push($graduatedPrice);
@@ -216,7 +209,7 @@ class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
             $this->graduatedPricesForCustomersGroups = $graduatedPricesForMembersGroups;
         }
 
-        if ($this->graduatedPricesForCustomersGroups->Count() > 1) {
+        if ($this->graduatedPricesForCustomersGroups->exists()) {
             return $this->graduatedPricesForCustomersGroups;
         } else {
             return false;
@@ -237,8 +230,8 @@ class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
         $quantity   = 1;
         $member     = Member::currentUser();
         if ($member &&
-            $member->SilvercartShoppingCartID > 0) {
-            $whereClause    = sprintf("`SilvercartProductID` = '%s' AND `SilvercartShoppingCartID` = '%s'", $this->owner->ID, $member->SilvercartShoppingCartID);
+            $member->SilvercartShoppingCart()->isInDB()) {
+            $whereClause    = sprintf("\"SilvercartProductID\" = '%s' AND \"SilvercartShoppingCartID\" = '%s'", $this->owner->ID, $member->SilvercartShoppingCartID);
             $position       = DataObject::get_one('SilvercartShoppingcartPosition', $whereClause);
             if ($position) {
                 $quantity = $position->Quantity;
