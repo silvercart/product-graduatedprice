@@ -132,13 +132,13 @@ class SilvercartGraduatedPriceProduct extends DataExtension {
             $price    = false;
             $whereClause                     = sprintf("\"SilvercartProductID\" = '%s' AND \"minimumQuantity\" <= '%d'", $this->owner->ID, $quantity);
             $graduatedPrices                 = DataObject::get('SilvercartGraduatedPrice', $whereClause);
-            $graduatedPricesForMembersGroups = new DataObjectSet();
+            $graduatedPricesForMembersGroups = new ArrayList();
 
             if ($member) {
                 if ($graduatedPrices) {
                     foreach ($graduatedPrices as $graduatedPrice) {
                         if ($graduatedPrice->CustomerGroups() &&
-                            $graduatedPrice->CustomerGroups()->Count() > 0 &&
+                            $graduatedPrice->CustomerGroups()->exists() &&
                             $member->inGroups($graduatedPrice->CustomerGroups())) {
 
                             $graduatedPricesForMembersGroups->push($graduatedPrice);
@@ -146,14 +146,14 @@ class SilvercartGraduatedPriceProduct extends DataExtension {
                     }
                     if ($graduatedPricesForMembersGroups) {
                         $graduatedPricesForMembersGroups->sort('priceAmount', "ASC");
-                        $price = $graduatedPricesForMembersGroups->First();
+                        $price = $graduatedPricesForMembersGroups->first();
                     }
                 }
             } else {
                 if ($graduatedPrices) {
                     foreach ($graduatedPrices as $graduatedPrice) {
                         if ($graduatedPrice->CustomerGroups() &&
-                            $graduatedPrice->CustomerGroups()->Count() > 0) {
+                            $graduatedPrice->CustomerGroups()->exists()) {
 
                             if ($graduatedPrice->CustomerGroups()->find('Code', 'anonymous')) {
                                 $graduatedPricesForMembersGroups->push($graduatedPrice);
@@ -179,15 +179,15 @@ class SilvercartGraduatedPriceProduct extends DataExtension {
     public function getGraduatedPricesForCustomersGroups() {
         if ($this->graduatedPricesForCustomersGroups === null) {
             $member                          = Member::currentUser();
-            $graduatedPricesForMembersGroups = new DataObjectSet();
+            $graduatedPricesForMembersGroups = new ArrayList();
             $whereClause                     = sprintf("\"SilvercartProductID\" = '%s'", $this->owner->ID);
-            $graduatedPrices                 = DataObject::get('SilvercartGraduatedPrice', $whereClause, 'minimumQuantity ASC');
+            $graduatedPrices                 = DataObject::get('SilvercartGraduatedPrice', $whereClause)->filter('minimumQuantity', 'ASC');
 
             if ($member) {
                 if ($graduatedPrices) {
                     foreach ($graduatedPrices as $graduatedPrice) {
                         if ($graduatedPrice->CustomerGroups() &&
-                            $graduatedPrice->CustomerGroups()->Count() > 0 &&
+                            $graduatedPrice->CustomerGroups()->exists() &&
                             $member->inGroups($graduatedPrice->CustomerGroups())) {
 
                             $graduatedPricesForMembersGroups->push($graduatedPrice);
