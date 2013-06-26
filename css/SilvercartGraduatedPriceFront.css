@@ -1,0 +1,21 @@
+
+.silvercart-graduated-price-table {
+    text-align: left;
+}
+#col1 .silvercart-graduated-price-table h3,
+#col4 .silvercart-graduated-price-table h3 {
+    font-size: 11px;
+    font-weight: bold;
+    color: #000;
+    margin: 0px 0px 5px 24px;
+}
+#col1_content .silvercart-graduated-price-table table {
+    width: 140px;
+    border: 1px #eee solid;
+    border-collapse: collapse;
+    margin: 0px 0px 0px 24px;
+}
+.silvercart-graduated-price-table table td {
+    border: 1px #eee solid;
+    border-collapse: collapse;
+}
