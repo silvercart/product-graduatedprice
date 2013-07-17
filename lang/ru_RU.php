@@ -39,3 +39,4 @@ $lang['ru_RU']['SilvercartGraduatedPrice']['SINGULARNAME'] = 'Ценовая г�
 $lang['ru_RU']['SilvercartGraduatedPrice']['PRICE'] = 'Цена';
 $lang['ru_RU']['SilvercartGraduatedPrice']['MINIMUMQUANTITY'] = 'Минимальное количество';
 $lang['ru_RU']['SilvercartGraduatedPrice']['NO_GROUP_RELATED'] = 'Клиентская группа не определена. Минимум одна группа должна быть сделана для установки цены. ';
+$lang['ru_RU']['SilvercartGraduatedPrice']['FROM']                              = 'from';

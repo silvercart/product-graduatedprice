@@ -39,3 +39,4 @@ $lang['en_US']['SilvercartGraduatedPrice']['PRICE']                             
 $lang['en_US']['SilvercartGraduatedPrice']['MINIMUMQUANTITY']                   = 'minimum quantity';
 $lang['en_US']['SilvercartGraduatedPrice']['NO_GROUP_RELATED']                  = 'No related customer group found! There must be at least one related customer group to use this price!';
 $lang['en_US']['SilvercartGraduatedPrice']['BUY_WITH_VOLUME_DISCOUNT']          = 'Buy with quantity discount';
+$lang['en_US']['SilvercartGraduatedPrice']['FROM']                              = 'from';

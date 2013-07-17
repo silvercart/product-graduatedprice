@@ -39,3 +39,4 @@ $lang['de_DE']['SilvercartGraduatedPrice']['PRICE']                             
 $lang['de_DE']['SilvercartGraduatedPrice']['MINIMUMQUANTITY']                   = 'Mindestanzahl';
 $lang['de_DE']['SilvercartGraduatedPrice']['NO_GROUP_RELATED']                  = 'Es wurde noch keine Kundengruppe zugeordnet. Es muss mindestens eine Kundengruppe zugeordnet werden, damit der Preis verwendet werden kann.';
 $lang['de_DE']['SilvercartGraduatedPrice']['BUY_WITH_VOLUME_DISCOUNT']          = 'Kaufen Sie mit Mengenrabatt';
+$lang['de_DE']['SilvercartGraduatedPrice']['FROM']                              = 'ab';
