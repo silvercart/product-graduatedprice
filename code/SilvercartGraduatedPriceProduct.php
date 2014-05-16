@@ -192,6 +192,9 @@ class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
             if ($member) {
                 if ($graduatedPrices) {
                     foreach ($graduatedPrices as $graduatedPrice) {
+                        if ($graduatedPrice->minimumQuantity <= 1) {
+                            continue;
+                        }
                         if ($graduatedPrice->CustomerGroups() &&
                             $graduatedPrice->CustomerGroups()->Count() > 0 &&
                             $member->inGroups($graduatedPrice->CustomerGroups())) {
@@ -216,7 +219,7 @@ class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
             $this->graduatedPricesForCustomersGroups = $graduatedPricesForMembersGroups;
         }
 
-        if ($this->graduatedPricesForCustomersGroups->Count() > 1) {
+        if ($this->graduatedPricesForCustomersGroups->Count() > 0) {
             return $this->graduatedPricesForCustomersGroups;
         } else {
             return false;
