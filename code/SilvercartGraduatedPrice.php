@@ -1,21 +1,8 @@
 <?php
 /**
- * Copyright 2012 pixeltricks GmbH
+ * Copyright 2015 pixeltricks GmbH
  *
  * This file is part of SilverCart.
- *
- * SilverCart is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * SilverCart is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with SilverCart.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @package Silvercart
  * @subpackage GraduatedPrices
@@ -27,10 +14,11 @@
  *
  * @package SilverCart
  * @subpackage GraduatedPrices
- * @author Roland Lehmann <rlehmann@pixeltricks.de>, Sebastian Diel <sdiel@pixeltricks.de>
+ * @author Roland Lehmann <rlehmann@pixeltricks.de>,
+ *         Sebastian Diel <sdiel@pixeltricks.de>
  * @copyright pixeltricks GmbH
- * @since 22.05.2012
- * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License
+ * @since 06.05.2015
+ * @license see license file in modules root directory
  */
 class SilvercartGraduatedPrice extends DataObject {
     
@@ -125,6 +113,35 @@ class SilvercartGraduatedPrice extends DataObject {
     }
     
     /**
+     * Returns the CMS fields.
+     * 
+     * @return FieldList
+     */
+    public function getCMSFields() {
+        $fields = parent::getCMSFields();
+        
+        $fields->removeByName('CustomerGroups');
+        
+        $groupsMap = array();
+        foreach (Group::get() as $group) {
+            // Listboxfield values are escaped, use ASCII char instead of &raquo;
+            $groupsMap[$group->ID] = $group->getBreadcrumbs(' > ');
+        }
+        asort($groupsMap);
+        $fields->addFieldToTab('Root.Main',
+            ListboxField::create('CustomerGroups', $this->fieldLabel('CustomerGroups'))
+                ->setMultiple(true)
+                ->setSource($groupsMap)
+                ->setAttribute(
+                    'data-placeholder', 
+                    _t('Member.ADDGROUP', 'Add group', 'Placeholder text for a dropdown')
+                )
+        );
+        
+        return $fields;
+    }
+    
+    /**
      * Summaryfields for display in tables.
      *
      * @return array
@@ -169,7 +186,9 @@ class SilvercartGraduatedPrice extends DataObject {
                 _t('SilvercartGraduatedPrice.NO_GROUP_RELATED')
             );
         }
-        return $groupsNamesFormatted;
+        $htmlText = HTMLText::create();
+        $htmlText->setValue($groupsNamesFormatted);
+        return $htmlText;
     }
     
     /**
@@ -184,10 +203,13 @@ class SilvercartGraduatedPrice extends DataObject {
         if ($this->CustomerGroups()->exists()) {
             $indicatorColor = 'green';
         }
-        return sprintf(
+        $indicatorColorHtml = sprintf(
                 '<div style="background-color: %s;">&nbsp;</div>',
                 $indicatorColor
         );
+        $htmlText = HTMLText::create();
+        $htmlText->setValue($indicatorColorHtml);
+        return $htmlText;
     }
 }
 
