@@ -1,21 +1,8 @@
 <?php
 /**
- * Copyright 2012 pixeltricks GmbH
+ * Copyright 2015 pixeltricks GmbH
  *
  * This file is part of SilverCart.
- *
- * SilverCart is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * SilverCart is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with SilverCart.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @package Silvercart
  * @subpackage GraduatedPrices
@@ -27,26 +14,25 @@
  *
  * @package SilverCart
  * @subpackage GraduatedPrices
- * @author Roland Lehmann <rlehmann@pixeltricks.de>, Sebastian Diel <sdiel@pixeltricks.de>
+ * @author Roland Lehmann <rlehmann@pixeltricks.de>,
+ *         Sebastian Diel <sdiel@pixeltricks.de>
  * @copyright pixeltricks GmbH
- * @since 22.05.2012
- * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License
+ * @since 06.05.2015
+ * @license see license file in modules root directory
  */
 class SilvercartGraduatedPriceProduct extends DataExtension {
 
     /**
      * Cache for method "getGraduatedPriceForCustomersGroups".
      *
-     * @var DataObjectSet
-     * @since 30.10.2012
+     * @var SilvercartGraduatedPrice
      */
     protected $graduatedPriceForCustomersGroups = null;
 
     /**
      * Cache for method "getGraduatedPricesForCustomersGroups".
      *
-     * @var DataObjectSet
-     * @since 30.10.2012
+     * @var ArrayList
      */
     protected $graduatedPricesForCustomersGroups = null;
     
@@ -78,26 +64,6 @@ class SilvercartGraduatedPriceProduct extends DataExtension {
     }
     
     /**
-     * Add the new relations fields to the CMS fields
-     *
-     * @param FieldSet &$fields the field set passed by reference
-     * 
-     * @return void
-     * 
-     * @author Roland Lehmann <rlehmann@pixeltricks.de>
-     * @since 04.09.2011
-     */
-    public function updateCMSFields(FieldList $fields) {
-        if ($this->owner->isInDB()) {
-            $graduatedPrices = $fields->dataFieldByName('SilvercartGraduatedPrices');
-            $graduatedPrices->setConfig(SilvercartGridFieldConfig_LanguageRelationEditor::create());
-            $root = $fields->findOrMakeTab('Root');
-            $root->removeByName('SilvercartGraduatedPrices');
-            $fields->addFieldToTab('Root.Prices', $graduatedPrices);
-        }
-    }
-    
-    /**
      * Updates the field labels
      *
      * @param array &$labels Labels to update
@@ -121,17 +87,17 @@ class SilvercartGraduatedPriceProduct extends DataExtension {
      * Selects all graduated prices for a customers groups that fit the $quantity.
      * 
      * @return SilvercartGraduatedPrice|false the most convenient price
-     * 
-     * @author Roland Lehmann <rlehmann@pixeltricks.de>
-     * @since 6.8.2011 
      */
     public function getGraduatedPriceForCustomersGroups() {
         if ($this->graduatedPriceForCustomersGroups === null) {
-            $member   = Member::currentUser();
-            $quantity = $this->owner->getProductQuantityInCart();
-            $price    = false;
-            $whereClause                     = sprintf("\"SilvercartProductID\" = '%s' AND \"minimumQuantity\" <= '%d'", $this->owner->ID, $quantity);
-            $graduatedPrices                 = DataObject::get('SilvercartGraduatedPrice', $whereClause);
+            $member                          = Member::currentUser();
+            $quantity                        = $this->owner->getProductQuantityInCart();
+            $price                           = false;
+            $filter                          = array(
+                'SilvercartProductID' => $this->owner->ID,
+            );
+            $this->owner->extend('updateGraduatedPriceFilter', $filter);
+            $graduatedPrices                 = SilvercartGraduatedPrice::get()->filter($filter)->where('"minimumQuantity" <= ' . $quantity);
             $graduatedPricesForMembersGroups = new ArrayList();
 
             if ($member) {
@@ -143,10 +109,6 @@ class SilvercartGraduatedPriceProduct extends DataExtension {
 
                             $graduatedPricesForMembersGroups->push($graduatedPrice);
                         }
-                    }
-                    if ($graduatedPricesForMembersGroups) {
-                        $graduatedPricesForMembersGroups->sort('priceAmount', "ASC");
-                        $price = $graduatedPricesForMembersGroups->first();
                     }
                 }
             } else {
@@ -162,6 +124,9 @@ class SilvercartGraduatedPriceProduct extends DataExtension {
                     }
                 }
             }
+            if ($graduatedPricesForMembersGroups) {
+                $price = $graduatedPricesForMembersGroups->sort('minimumQuantity', "DESC")->first();
+            }
             $this->graduatedPriceForCustomersGroups = $price;
         }
 
@@ -171,17 +136,17 @@ class SilvercartGraduatedPriceProduct extends DataExtension {
     /**
      * Returns all graduated prices for a customers groups.
      *
-     * @return DataObjectSet
-     *
-     * @author Sascha Koehler <skoehler@pixeltricks.de>
-     * @since 30.10.2011
+     * @return ArrayList
      */
     public function getGraduatedPricesForCustomersGroups() {
         if ($this->graduatedPricesForCustomersGroups === null) {
             $member                          = Member::currentUser();
             $graduatedPricesForMembersGroups = new ArrayList();
-            $whereClause                     = sprintf("\"SilvercartProductID\" = '%s'", $this->owner->ID);
-            $graduatedPrices                 = DataObject::get('SilvercartGraduatedPrice', $whereClause)->filter('minimumQuantity', 'ASC');
+            $filter                          = array(
+                'SilvercartProductID' => $this->owner->ID,    
+            );
+            $this->owner->extend('updateGraduatedPricesFilter', $filter);
+            $graduatedPrices                 = SilvercartGraduatedPrice::get()->filter($filter)->sort('minimumQuantity', 'ASC');
 
             if ($member) {
                 if ($graduatedPrices) {
