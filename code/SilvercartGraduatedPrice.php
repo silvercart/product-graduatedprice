@@ -72,6 +72,13 @@ class SilvercartGraduatedPrice extends DataObject {
         'GroupsNamesFormatted'  => 'HTMLText',
         'RelatedGroupIndicator' => 'HTMLText',
     );
+    
+    /**
+     * Cached price
+     *
+     * @var Money
+     */
+    protected $cachedPrice = null;
 
     /**
      * Returns the translated singular name of the object. If no translation exists
@@ -192,6 +199,55 @@ class SilvercartGraduatedPrice extends DataObject {
      */
     public function getPriceFormatted() {
         return $this->price->Nice();
+    }
+
+    /**
+     * Returns the price.
+     * 
+     * @return Money
+     */
+    public function getPrice() {
+        if (SilvercartTools::isBackendEnvironment()) {
+            return $this->getField('price');
+        }
+        if (is_null($this->cachedPrice)) {
+            $price = $this->getField('price');
+            $this->cachedPrice = new Money();
+            $this->cachedPrice->setCurrency($price->getCurrency());
+            $member = Member::currentUser();
+
+            if ($member instanceof Member &&
+                $member->doesNotHaveToPayTaxes()) {
+
+                $this->cachedPrice->setAmount($price->getAmount() - $this->getTaxAmount($price->getAmount()));
+            }
+        }
+        
+        return $this->cachedPrice;
+    }
+
+    /**
+     * returns the tax amount included in $this
+     * 
+     * @param float $priceAmount Price amount
+     *
+     * @return float
+     *
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 06.04.2016
+     */
+    public function getTaxAmount($priceAmount) {
+        $member = Member::currentUser();
+
+        if (($member instanceof Member &&
+             $member->showPricesGross(true)) ||
+            SilvercartConfig::DefaultPriceType() == 'gross') {
+            
+            $taxRate = $priceAmount - ($priceAmount / (100 + $this->SilvercartProduct()->getTaxRate(true)) * 100);
+        } else {
+            $taxRate = $priceAmount * ($this->SilvercartProduct()->getTaxRate(true) / 100);
+        }
+        return $taxRate;
     }
     
     /**

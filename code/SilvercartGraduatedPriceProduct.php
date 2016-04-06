@@ -150,10 +150,6 @@ class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
                             $graduatedPricesForMembersGroups->push($graduatedPrice);
                         }
                     }
-                    if ($graduatedPricesForMembersGroups) {
-                        $graduatedPricesForMembersGroups->sort('priceAmount', "ASC");
-                        $price = $graduatedPricesForMembersGroups->First();
-                    }
                 }
             } else {
                 if ($graduatedPrices) {
@@ -167,6 +163,10 @@ class SilvercartGraduatedPriceProduct extends DataObjectDecorator {
                         }
                     }
                 }
+            }
+            if ($graduatedPricesForMembersGroups->Count() > 0) {
+                $graduatedPricesForMembersGroups->sort('priceAmount', "ASC");
+                $price = $graduatedPricesForMembersGroups->First();
             }
             $this->graduatedPriceForCustomersGroups = $price;
         }
