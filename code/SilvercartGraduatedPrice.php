@@ -220,6 +220,8 @@ class SilvercartGraduatedPrice extends DataObject {
                 $member->doesNotHaveToPayTaxes()) {
 
                 $this->cachedPrice->setAmount($price->getAmount() - $this->getTaxAmount($price->getAmount()));
+            } else {
+                $this->cachedPrice->setAmount($price->getAmount());
             }
         }
         
