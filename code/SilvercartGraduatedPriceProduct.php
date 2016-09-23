@@ -90,7 +90,7 @@ class SilvercartGraduatedPriceProduct extends DataExtension {
      */
     public function getGraduatedPriceForCustomersGroups() {
         if ($this->graduatedPriceForCustomersGroups === null) {
-            $member                          = Member::currentUser();
+            $member                          = SilvercartCustomer::currentUser();
             $quantity                        = $this->owner->getProductQuantityInCart();
             $price                           = false;
             $filter                          = array(
@@ -140,7 +140,7 @@ class SilvercartGraduatedPriceProduct extends DataExtension {
      */
     public function getGraduatedPricesForCustomersGroups() {
         if ($this->graduatedPricesForCustomersGroups === null) {
-            $member                          = Member::currentUser();
+            $member                          = SilvercartCustomer::currentUser();
             $graduatedPricesForMembersGroups = new ArrayList();
             $filter                          = array(
                 'SilvercartProductID' => $this->owner->ID,    
@@ -188,17 +188,19 @@ class SilvercartGraduatedPriceProduct extends DataExtension {
      * 
      * @return integer
      * 
-     * @author Roland Lehmann <rlehmann@pixeltricks.de>, Sebastian Diel <sdiel@pixeltricks.de>
-     * @since 21.06.2012
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     *         Roland Lehmann <rlehmann@pixeltricks.de>
+     * @since 23.09.2016
      */
     public function getProductQuantityInCart() {
         $quantity   = 1;
-        $member     = Member::currentUser();
-        if ($member &&
-            $member->SilvercartShoppingCart()->isInDB()) {
-            $whereClause    = sprintf("\"SilvercartProductID\" = '%s' AND \"SilvercartShoppingCartID\" = '%s'", $this->owner->ID, $member->SilvercartShoppingCartID);
-            $position       = DataObject::get_one('SilvercartShoppingcartPosition', $whereClause);
-            if ($position) {
+        $member     = SilvercartCustomer::currentUser();
+        if ($member instanceof Member &&
+            $member->exists()) {
+            $whereClause    = sprintf('"SilvercartProductID" = \'%s\' AND "SilvercartShoppingCartID" = \'%s\'', $this->owner->ID, $member->SilvercartShoppingCartID);
+            $position       = SilvercartShoppingcartPosition::get()->where($whereClause)->first();
+            if ($position instanceof SilvercartShoppingcartPosition &&
+                $position->exists()) {
                 $quantity = $position->Quantity;
             }
         }
