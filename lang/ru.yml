@@ -1,5 +1,7 @@
 ru:
   SilvercartGraduatedPrice:
+    BUY_WITH_VOLUME_DISCOUNT: 'Buy with quantity discount'
+    FROM: 'from'
     MINIMUMQUANTITY: "Минимальное количество"
     NO_GROUP_RELATED: "Клиентская группа не определена. Минимум одна группа должна быть сделана для установки цены. "
     PLURALNAME: "Ценовые группы"
