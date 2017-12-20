@@ -107,7 +107,9 @@ class SilvercartGraduatedPriceProduct extends DataExtension {
                             $graduatedPrice->CustomerGroups()->exists() &&
                             $member->inGroups($graduatedPrice->CustomerGroups())) {
 
-                            $graduatedPricesForMembersGroups->push($graduatedPrice);
+                            if ($this->isPriceQualified($graduatedPrice, $member)) {
+                                $graduatedPricesForMembersGroups->push($graduatedPrice);
+                            }
                         }
                     }
                 }
@@ -118,7 +120,9 @@ class SilvercartGraduatedPriceProduct extends DataExtension {
                             $graduatedPrice->CustomerGroups()->exists()) {
 
                             if ($graduatedPrice->CustomerGroups()->find('Code', 'anonymous')) {
-                                $graduatedPricesForMembersGroups->push($graduatedPrice);
+                                if ($this->isPriceQualified($graduatedPrice)) {
+                                    $graduatedPricesForMembersGroups->push($graduatedPrice);
+                                }
                             }
                         }
                     }
@@ -155,7 +159,9 @@ class SilvercartGraduatedPriceProduct extends DataExtension {
                             $graduatedPrice->CustomerGroups()->exists() &&
                             $member->inGroups($graduatedPrice->CustomerGroups())) {
 
-                            $graduatedPricesForMembersGroups->push($graduatedPrice);
+                            if ($this->isPriceQualified($graduatedPrice, $member)) {
+                                $graduatedPricesForMembersGroups->push($graduatedPrice);
+                            }
                         }
                     }
                 }
@@ -165,7 +171,9 @@ class SilvercartGraduatedPriceProduct extends DataExtension {
                         if ($graduatedPrice->CustomerGroups()->exists()) {
 
                             if ($graduatedPrice->CustomerGroups()->find('Code', 'anonymous')) {
-                                $graduatedPricesForMembersGroups->push($graduatedPrice);
+                                if ($this->isPriceQualified($graduatedPrice)) {
+                                    $graduatedPricesForMembersGroups->push($graduatedPrice);
+                                }
                             }
                         }
                     }
@@ -179,6 +187,31 @@ class SilvercartGraduatedPriceProduct extends DataExtension {
         } else {
             return false;
         }
+    }
+    
+    /**
+     * Returns whether the given price is qualified for the given member.
+     * By default, this will return true.
+     * If any extension returns false, the method will return false.
+     * 
+     * @param SilvercartGraduatedPrice $graduatedPrice Graduated price
+     * @param Member                   $member         Member
+     * 
+     * @return boolean
+     * 
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 20.12.2017
+     */
+    public function isPriceQualified(SilvercartGraduatedPrice $graduatedPrice, Member $member = null) {
+        $isPriceQualified = true;
+        $result = $graduatedPrice->extend('updateIsPriceQualified', $member);
+        if (is_array($result) &&
+            !empty($result) &&
+            in_array(false, $result, true)) {
+            
+            $isPriceQualified = false;
+        }
+        return $isPriceQualified;
     }
     
     /**
