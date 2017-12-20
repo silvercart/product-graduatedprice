@@ -128,7 +128,7 @@ class SilvercartGraduatedPriceProduct extends DataExtension {
                     }
                 }
             }
-            $this->owner->extend('updateGraduatedPriceForCustomersGroups', $graduatedPricesForMembersGroups, $member);
+            $this->owner->extend('updateGraduatedPriceForCustomersGroups', $graduatedPricesForMembersGroups, $member, $quantity);
             if ($graduatedPricesForMembersGroups) {
                 $price = $graduatedPricesForMembersGroups->sort('minimumQuantity', "DESC")->first();
             }
@@ -181,7 +181,7 @@ class SilvercartGraduatedPriceProduct extends DataExtension {
                 }
             }
             $this->owner->extend('updateGraduatedPricesForCustomersGroups', $graduatedPricesForMembersGroups, $member);
-            $this->graduatedPricesForCustomersGroups = $graduatedPricesForMembersGroups;
+            $this->graduatedPricesForCustomersGroups = $graduatedPricesForMembersGroups->sort('minimumQuantity', 'ASC');
         }
 
         if ($this->graduatedPricesForCustomersGroups->exists()) {
