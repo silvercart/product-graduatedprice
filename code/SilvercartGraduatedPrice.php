@@ -29,7 +29,7 @@ class SilvercartGraduatedPrice extends DataObject {
      */
     public static $db = array(
         'price'             => 'SilvercartMoney',
-        'minimumQuantity'   => 'Int'
+        'minimumQuantity'   => 'Int',
     );
     
     /**
@@ -102,10 +102,10 @@ class SilvercartGraduatedPrice extends DataObject {
         $fieldLabels = array_merge(
                 parent::fieldLabels($includerelations),
                 array(
-                    'price'             => _t('SilvercartGraduatedPrice.PRICE'),
-                    'minimumQuantity'   => _t('SilvercartGraduatedPrice.MINIMUMQUANTITY'),
-                    'SilvercartProduct' => _t('SilvercartProduct.SINGULARNAME'),
-                    'CustomerGroups'    => _t('Group.PLURALNAME'),
+                    'price'             => _t('SilvercartGraduatedPrice.PRICE', 'Price'),
+                    'minimumQuantity'   => _t('SilvercartGraduatedPrice.MINIMUMQUANTITY', 'Minimum Quantity'),
+                    'SilvercartProduct' => SilvercartProduct::singleton()->singular_name(),
+                    'CustomerGroups'    => Group::singleton()->plural_name(),
                 )
         );
         $this->extend('updateFieldLabels', $fieldLabels);
