@@ -1,5 +1,5 @@
 de:
-  SilvercartGraduatedPrice:
+  SilverCart\GraduatedPrice\Model\GraduatedPrice:
     BUY_WITH_VOLUME_DISCOUNT: 'Kaufen Sie mit Mengenrabatt'
     FROM: 'ab'
     MINIMUMQUANTITY: "Mindestanzahl"

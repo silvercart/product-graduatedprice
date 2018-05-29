@@ -1,65 +1,75 @@
 <?php
-/**
- * Copyright 2015 pixeltricks GmbH
- *
- * This file is part of SilverCart.
- *
- * @package Silvercart
- * @subpackage GraduatedPrices
- */
+
+namespace SilverCart\GraduatedPrice\Model;
+
+use SilverCart\Dev\Tools;
+use SilverCart\Model\Product\Product;
+use SilverCart\ORM\FieldType\DBMoney;
+use SilverStripe\Forms\ListboxField;
+use SilverStripe\ORM\FieldType\DBHTMLText;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\Security\Group;
+use SilverStripe\Security\Member;
 
 /**
  * abstract for price ranges
  * Customers may get a discount depending on the product quantity they bought.
  *
  * @package SilverCart
- * @subpackage GraduatedPrices
+ * @subpackage GraduatedPrice_Model
  * @author Roland Lehmann <rlehmann@pixeltricks.de>,
  *         Sebastian Diel <sdiel@pixeltricks.de>
  * @copyright pixeltricks GmbH
- * @since 06.05.2015
+ * @since 29.05.2018
  * @license see license file in modules root directory
  */
-class SilvercartGraduatedPrice extends DataObject {
+class GraduatedPrice extends DataObject {
     
     /**
-     * sapphire class attributes for ORM
+     * DB attributes
      * 
      * @var array 
      */
-    public static $db = array(
-        'price'             => 'SilvercartMoney',
+    private static $db = [
+        'price'             => DBMoney::class,
         'minimumQuantity'   => 'Int',
-    );
+    ];
     
     /**
      * 1:1 or 1:n relationships.
      *
      * @var array
      */
-    public static $has_one = array(
-        'SilvercartProduct' => 'SilvercartProduct'
-    );
+    private static $has_one = [
+        'Product' => Product::class,
+    ];
     
     /**
      * n:m relationships.
      *
      * @var array
      */
-    public static $many_many = array(
-        'CustomerGroups' => 'Group'
-    );
+    private static $many_many = [
+        'CustomerGroups' => Group::class,
+    ];
 
     /**
      * cast the return values of methods to attributes
      * 
      * @var array
      */
-    public static $casting = array(
-        'PriceFormatted'        => 'VarChar(20)',
-        'GroupsNamesFormatted'  => 'HTMLText',
-        'RelatedGroupIndicator' => 'HTMLText',
-    );
+    private static $casting = [
+        'PriceFormatted'        => 'Varchar(20)',
+        'GroupsNamesFormatted'  => DBHTMLText::class,
+        'RelatedGroupIndicator' => DBHTMLText::class,
+    ];
+    
+    /**
+     * DB table name
+     *
+     * @var string
+     */
+    private static $table_name = 'SilvercartGraduatedPrice';
 
     /**
      * Returns the translated singular name of the object. If no translation exists
@@ -67,11 +77,11 @@ class SilvercartGraduatedPrice extends DataObject {
      * 
      * @return string The objects singular name 
      * 
-     * @author Roland Lehmann <rlehmann@pixeltricks.de>, Sebastian Diel <sdiel@pixeltricks.de>
-     * @since 22.05.2012
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 29.05.2018
      */
     public function singular_name() {
-        return SilvercartTools::singular_name_for($this);
+        return Tools::singular_name_for($this);
     }
     
     /**
@@ -80,11 +90,11 @@ class SilvercartGraduatedPrice extends DataObject {
      * 
      * @return string the objects plural name
      * 
-     * @author Roland Lehmann <rlehmann@pixeltricks.de>, Sebastian Diel <sdiel@pixeltricks.de>
-     * @since 22.05.2012
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 29.05.2018
      */
     public function plural_name() {
-        return SilvercartTools::plural_name_for($this);
+        return Tools::plural_name_for($this);
     }
     
     /**
@@ -95,18 +105,20 @@ class SilvercartGraduatedPrice extends DataObject {
      * @return array
      *
      * @author Roland Lehmann <rlehmann@pixeltricks.de>
-     * @copyright 2011 pixeltricks GmbH
      * @since 23.08.2011
      */
     public function fieldLabels($includerelations = true) {
         $fieldLabels = array_merge(
                 parent::fieldLabels($includerelations),
-                array(
-                    'price'             => _t('SilvercartGraduatedPrice.PRICE', 'Price'),
-                    'minimumQuantity'   => _t('SilvercartGraduatedPrice.MINIMUMQUANTITY', 'Minimum Quantity'),
-                    'SilvercartProduct' => SilvercartProduct::singleton()->singular_name(),
-                    'CustomerGroups'    => Group::singleton()->plural_name(),
-                )
+                Tools::field_labels_for(static::class),
+                [
+                    'price'           => _t(GraduatedPrice::class . '.PRICE', 'Price'),
+                    'minimumQuantity' => _t(GraduatedPrice::class . '.MINIMUMQUANTITY', 'Minimum Quantity'),
+                    'Product'         => Product::singleton()->singular_name(),
+                    'CustomerGroups'  => Group::singleton()->plural_name(),
+                    'NoGroupRelated'  => _t(GraduatedPrice::class . '.NO_GROUP_RELATED', 'No related customer group found!'),
+                    'AddGroup'        => _t(Member::class . '.ADDGROUP', 'Add group'),
+                ]
         );
         $this->extend('updateFieldLabels', $fieldLabels);
         return $fieldLabels;
@@ -122,7 +134,7 @@ class SilvercartGraduatedPrice extends DataObject {
         
         $fields->removeByName('CustomerGroups');
         
-        $groupsMap = array();
+        $groupsMap = [];
         foreach (Group::get() as $group) {
             // Listboxfield values are escaped, use ASCII char instead of &raquo;
             $groupsMap[$group->ID] = $group->getBreadcrumbs(' > ');
@@ -130,11 +142,10 @@ class SilvercartGraduatedPrice extends DataObject {
         asort($groupsMap);
         $fields->addFieldToTab('Root.Main',
             ListboxField::create('CustomerGroups', $this->fieldLabel('CustomerGroups'))
-                ->setMultiple(true)
                 ->setSource($groupsMap)
                 ->setAttribute(
                     'data-placeholder', 
-                    _t('Member.ADDGROUP', 'Add group', 'Placeholder text for a dropdown')
+                    $this->fieldLabel('AddGroup')
                 )
         );
         
@@ -147,18 +158,31 @@ class SilvercartGraduatedPrice extends DataObject {
      * @return array
      *
      * @author Roland Lehmann <rlehmann@pixeltricks.de>
-     * @copyright 2011 pixeltricks GmbH
      * @since 23.08.2011
      */
     public function summaryFields() {
-        $summaryFields = array(
+        $summaryFields = [
             'RelatedGroupIndicator' => '&nbsp;',
             'minimumQuantity'       => $this->fieldLabel('minimumQuantity'),
             'PriceFormatted'        => $this->fieldLabel('price'),
             'GroupsNamesFormatted'  => $this->fieldLabel('CustomerGroups'),
-        );
+        ];
         $this->extend('updateSummaryFields', $summaryFields);
         return $summaryFields;
+    }
+    
+    /**
+     * Returns a generic title to display in backend breadcrumbs.
+     * 
+     * @return string
+     */
+    public function getTitle() {
+        $title  = $this->price->Nice();
+        $title .= ' | ' . $this->fieldLabel('minimumQuantity') . ': ' . $this->minimumQuantity;
+        if ($this->CustomerGroups()->exists()) {
+            $title .= ' | ' . implode(',', $this->CustomerGroups()->map()->toArray());
+        }
+        return $title;
     }
     
     /**
@@ -183,10 +207,10 @@ class SilvercartGraduatedPrice extends DataObject {
         } else {
             $groupsNamesFormatted = sprintf(
                 '<strong style="color: red;">%s</strong>',
-                _t('SilvercartGraduatedPrice.NO_GROUP_RELATED')
+                $this->fieldLabel('NoGroupRelated')
             );
         }
-        $htmlText = HTMLText::create();
+        $htmlText = DBHTMLText::create();
         $htmlText->setValue($groupsNamesFormatted);
         return $htmlText;
     }
@@ -207,7 +231,7 @@ class SilvercartGraduatedPrice extends DataObject {
                 '<div style="background-color: %s;">&nbsp;</div>',
                 $indicatorColor
         );
-        $htmlText = HTMLText::create();
+        $htmlText = DBHTMLText::create();
         $htmlText->setValue($indicatorColorHtml);
         return $htmlText;
     }

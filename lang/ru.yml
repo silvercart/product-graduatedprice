@@ -1,5 +1,5 @@
 ru:
-  SilvercartGraduatedPrice:
+  SilverCart\GraduatedPrice\Model\GraduatedPrice:
     BUY_WITH_VOLUME_DISCOUNT: 'Buy with quantity discount'
     FROM: 'from'
     MINIMUMQUANTITY: "Минимальное количество"

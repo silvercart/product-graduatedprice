@@ -1,0 +1,9 @@
+---
+Name: silvercart-product-graduatedprice-extensions
+---
+SilverCart\Model\Product\Product:
+  extensions:
+    - SilverCart\GraduatedPrice\Extensions\ProductExtension
+SilverStripe\Security\Group:
+  extensions:
+    - SilverCart\GraduatedPrice\Extensions\GroupExtension

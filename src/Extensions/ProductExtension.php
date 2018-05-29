@@ -1,0 +1,250 @@
+<?php
+
+namespace SilverCart\GraduatedPrice\Extensions;
+
+use SilverCart\GraduatedPrice\Model\GraduatedPrice;
+use SilverCart\Model\Customer\Customer;
+use SilverCart\Model\Order\ShoppingCartPosition;
+use SilverCart\ORM\FieldType\DBMoney;
+use SilverStripe\Control\Controller;
+use SilverStripe\ORM\ArrayList;
+use SilverStripe\ORM\DataExtension;
+use SilverStripe\Security\Member;
+use SilverStripe\View\ArrayData;
+
+/**
+ * Extension for Product.
+ * Overwrites the return value of the price getter.
+ *
+ * @package SilverCart
+ * @subpackage GraduatedPrice_Extensions
+ * @author Roland Lehmann <rlehmann@pixeltricks.de>,
+ *         Sebastian Diel <sdiel@pixeltricks.de>
+ * @copyright pixeltricks GmbH
+ * @since 29.05.2018
+ * @license see license file in modules root directory
+ */
+class ProductExtension extends DataExtension {
+
+    /**
+     * Cache for method "getGraduatedPriceForCustomersGroups".
+     *
+     * @var GraduatedPrice[]
+     */
+    protected $graduatedPriceForCustomersGroups = [];
+
+    /**
+     * Cache for method "getGraduatedPricesForCustomersGroups".
+     *
+     * @var ArrayList[]
+     */
+    protected $graduatedPricesForCustomersGroups = [];
+    
+    /**
+     * 1:n relationships.
+     *
+     * @var array
+     */
+    private static $has_many = [
+        'GraduatedPrices' => GraduatedPrice::class,
+    ];
+    
+    /**
+     * decorates the price getter of Product. It updates a products price if
+     * a price range is found for the customer class.
+     * 
+     * @param DBMoney &$price the return value of the decorated method passed by reference
+     * 
+     * @return void 
+     * 
+     * @author Sebastian Diel <sdiel@pixeltricks.de>,
+     *         Roland Lehmann <rlehmann@pixeltricks.de>
+     * @since 29.05.2018
+     */
+    public function updatePrice(DBMoney &$price) {
+        $customerPrice = $this->getGraduatedPriceForCustomersGroups();
+        if ($customerPrice instanceof GraduatedPrice &&
+            $customerPrice->exists()) {
+            $price = $customerPrice->price;
+        }
+    }
+    
+    /**
+     * Updates the field labels
+     *
+     * @param array &$labels Labels to update
+     * 
+     * @return void
+     * 
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 29.05.2018
+     */
+    public function updateFieldLabels(&$labels) {
+        $labels = array_merge(
+                $labels,
+                [
+                    'GraduatedPrices' => GraduatedPrice::singleton()->plural_name(),
+                ]
+        );
+    }
+
+    /**
+     * Calculates the most convenient price
+     * Selects all graduated prices for a customers groups that fit the $quantity.
+     * 
+     * @return GraduatedPrice|false the most convenient price
+     */
+    public function getGraduatedPriceForCustomersGroups() {
+        if (!array_key_exists($this->owner->ID, $this->graduatedPriceForCustomersGroups)) {
+            $member   = Customer::currentUser();
+            $quantity = $this->owner->getProductQuantityInCart();
+            $price    = false;
+            $filter   = [
+                'ProductID' => $this->owner->ID,
+            ];
+            $this->owner->extend('updateGraduatedPriceFilter', $filter);
+            $graduatedPrices                 = GraduatedPrice::get()->filter($filter)->where('"minimumQuantity" <= ' . $quantity);
+            $graduatedPricesForMembersGroups = $this->filterGraduatedPrices($graduatedPrices, $member);
+
+            $this->owner->extend('updateGraduatedPriceForCustomersGroups', $graduatedPricesForMembersGroups, $member, $quantity);
+            if ($graduatedPricesForMembersGroups) {
+                $price = $graduatedPricesForMembersGroups->sort('minimumQuantity', "DESC")->first();
+            }
+            $this->graduatedPriceForCustomersGroups[$this->owner->ID] = $price;
+        }
+
+        return $this->graduatedPriceForCustomersGroups[$this->owner->ID];
+    }
+
+    /**
+     * Returns all graduated prices for a customers groups.
+     *
+     * @return ArrayList
+     */
+    public function getGraduatedPricesForCustomersGroups() {
+        if (!array_key_exists($this->owner->ID, $this->graduatedPricesForCustomersGroups)) {
+            $member = Customer::currentUser();
+            $filter = ['ProductID' => $this->owner->ID];
+            $this->owner->extend('updateGraduatedPricesFilter', $filter);
+            $graduatedPrices                 = GraduatedPrice::get()->filter($filter)->sort('minimumQuantity', 'ASC');
+            $graduatedPricesForMembersGroups = $this->filterGraduatedPrices($graduatedPrices, $member);
+            
+            $this->owner->extend('updateGraduatedPricesForCustomersGroups', $graduatedPricesForMembersGroups, $member);
+            $this->graduatedPricesForCustomersGroups[$this->owner->ID] = $graduatedPricesForMembersGroups->sort('minimumQuantity', 'ASC');
+        }
+
+        if ($this->graduatedPricesForCustomersGroups[$this->owner->ID]->exists()) {
+            return $this->graduatedPricesForCustomersGroups[$this->owner->ID];
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Filters the graduated prices by the current Member context.
+     * 
+     * @param DataList $graduatedPrices Graduated prices
+     * @param Member   $member          Member
+     * 
+     * @return ArrayList
+     * 
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 29.05.2018
+     */
+    protected function filterGraduatedPrices($graduatedPrices, $member) {
+        $graduatedPricesForMembersGroups = new ArrayList();
+
+        if ($graduatedPrices->exists()) {
+            if ($member instanceof Member &&
+                $member->exists()) {
+                foreach ($graduatedPrices as $graduatedPrice) {
+                    if ($graduatedPrice->CustomerGroups()->exists() &&
+                        $member->inGroups($graduatedPrice->CustomerGroups()) &&
+                        $this->isPriceQualified($graduatedPrice, $member)) {
+
+                        $graduatedPricesForMembersGroups->push($graduatedPrice);
+                    }
+                }
+            } else {
+                foreach ($graduatedPrices as $graduatedPrice) {
+                    if ($graduatedPrice->CustomerGroups()->exists() &&
+                        $graduatedPrice->CustomerGroups()->find('Code', 'anonymous') &&
+                        $this->isPriceQualified($graduatedPrice)) {
+
+                        $graduatedPricesForMembersGroups->push($graduatedPrice);
+                    }
+                }
+            }
+        }
+        return $graduatedPricesForMembersGroups;
+    }
+    
+    /**
+     * Returns whether the given price is qualified for the given member.
+     * By default, this will return true.
+     * If any extension returns false, the method will return false.
+     * 
+     * @param GraduatedPrice $graduatedPrice Graduated price
+     * @param Member         $member         Member
+     * 
+     * @return boolean
+     * 
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 20.12.2017
+     */
+    public function isPriceQualified(GraduatedPrice $graduatedPrice, Member $member = null) {
+        $isPriceQualified = true;
+        $result = $graduatedPrice->extend('updateIsPriceQualified', $member);
+        if (is_array($result) &&
+            !empty($result) &&
+            in_array(false, $result, true)) {
+            
+            $isPriceQualified = false;
+        }
+        return $isPriceQualified;
+    }
+    
+    /**
+     * A logged in member always has a cart. If this product is inside the cart
+     * the positions quantity will be returned. If the product is not in the cart
+     * yet 1 will be returned.
+     * 
+     * @return integer
+     */
+    public function getProductQuantityInCart() {
+        $quantity = 1;
+        $member   = Customer::currentUser();
+        if ($member instanceof Member &&
+            $member->exists()) {
+            $position    = ShoppingCartPosition::get()->filter([
+                'ProductID'      => $this->owner->ID,
+                'ShoppingCartID' => $member->ShoppingCartID,
+            ])->first();
+            if ($position instanceof ShoppingCartPosition &&
+                $position->exists()) {
+                $quantity = $position->Quantity;
+            }
+        }
+        return $quantity;
+    }
+    
+    /**
+     * Adds some additional meta data to render into the product detail page.
+     * 
+     * @param ArrayList $metaData Existng list of additional meta data to render
+     * 
+     * @return void
+     * 
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 29.05.2018
+     */
+    public function addPluggedInProductMetaData(ArrayList $metaData) {
+        if (Controller::curr()->hasMethod('isProductDetailView') &&
+            Controller::curr()->isProductDetailView()) {
+            $metaData->push(ArrayData::create([
+                'MetaData' => $this->owner->renderWith(GraduatedPrice::class . '_Table'),
+            ]));
+        }
+    }
+    
+}

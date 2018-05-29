@@ -1,5 +1,0 @@
-/* Ensure there's enough room in the tab for TreeMultiSelectField expansion */
-div#CustomerGroups.field.treemultiselect {
-	height: 250px;
-}
-
