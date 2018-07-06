@@ -4,8 +4,8 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th class="right"><%t SilverCart\GraduatedPrice\Model\GraduatedPrice.FROM 'from' %></th>
-                    <th class="right"><%t SilverCart\Model\Product\Product.PRICE_SINGLE 'Price single' %></th>
+                    <th class="text-right"><%t SilverCart\GraduatedPrice\Model\GraduatedPrice.FROM 'from' %></th>
+                    <th class="text-right"><%t SilverCart\Model\Product\Product.PRICE_SINGLE 'Price single' %></th>
                 </tr>
             </thead>
             <tbody>
