@@ -80,7 +80,7 @@ class GraduatedPrice extends DataObject
      */
     public static function get_by_group(Group $group, Product $product) : DataList
     {
-        $tableName = $this->config()->table_name;
+        $tableName = self::config()->table_name;
         $idQuery   = "SELECT DISTINCT ID FROM {$tableName} WHERE ProductID = {$product->ID}";
         $records   = DB::query("SELECT DISTINCT {$tableName}ID AS GraduatedPriceID FROM {$tableName}_CustomerGroups WHERE GroupID = {$group->ID} AND {$tableName}ID IN ({$idQuery})");
         $priceIDs  = array_filter(array_keys($records->map()), function($value) { return $value !== ''; });
