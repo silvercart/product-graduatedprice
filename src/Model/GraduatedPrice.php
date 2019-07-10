@@ -197,9 +197,9 @@ class GraduatedPrice extends DataObject
     /**
      * Returns the Price formatted by locale.
      *
-     * @return string
+     * @return string|null
      */
-    public function getPriceFormatted() : string
+    public function getPriceFormatted() : ?string
     {
         return $this->price->Nice();
     }
