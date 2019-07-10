@@ -5,9 +5,12 @@ namespace SilverCart\GraduatedPrice\Model;
 use SilverCart\Dev\Tools;
 use SilverCart\Model\Product\Product;
 use SilverCart\ORM\FieldType\DBMoney;
+use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\ListboxField;
 use SilverStripe\ORM\FieldType\DBHTMLText;
+use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\DB;
 use SilverStripe\Security\Group;
 use SilverStripe\Security\Member;
 
@@ -23,8 +26,8 @@ use SilverStripe\Security\Member;
  * @since 29.05.2018
  * @license see license file in modules root directory
  */
-class GraduatedPrice extends DataObject {
-    
+class GraduatedPrice extends DataObject
+{
     /**
      * DB attributes
      * 
@@ -34,7 +37,6 @@ class GraduatedPrice extends DataObject {
         'price'             => DBMoney::class,
         'minimumQuantity'   => 'Int',
     ];
-    
     /**
      * 1:1 or 1:n relationships.
      *
@@ -43,7 +45,6 @@ class GraduatedPrice extends DataObject {
     private static $has_one = [
         'Product' => Product::class,
     ];
-    
     /**
      * n:m relationships.
      *
@@ -52,7 +53,6 @@ class GraduatedPrice extends DataObject {
     private static $many_many = [
         'CustomerGroups' => Group::class,
     ];
-
     /**
      * cast the return values of methods to attributes
      * 
@@ -63,51 +63,59 @@ class GraduatedPrice extends DataObject {
         'GroupsNamesFormatted'  => DBHTMLText::class,
         'RelatedGroupIndicator' => DBHTMLText::class,
     ];
-    
     /**
      * DB table name
      *
      * @var string
      */
     private static $table_name = 'SilvercartGraduatedPrice';
-
+    
     /**
-     * Returns the translated singular name of the object. If no translation exists
-     * the class name will be returned.
+     * Returns all prices for the given $group and $product.
      * 
-     * @return string The objects singular name 
+     * @param Group   $group   Group to get prices for
+     * @param Product $product Product to get prices for
      * 
-     * @author Sebastian Diel <sdiel@pixeltricks.de>
-     * @since 29.05.2018
+     * @return DataList
      */
-    public function singular_name() {
+    public static function get_by_group(Group $group, Product $product) : DataList
+    {
+        $tableName = $this->config()->table_name;
+        $idQuery   = "SELECT DISTINCT ID FROM {$tableName} WHERE ProductID = {$product->ID}";
+        $records   = DB::query("SELECT DISTINCT {$tableName}ID AS GraduatedPriceID FROM {$tableName}_CustomerGroups WHERE GroupID = {$group->ID} AND {$tableName}ID IN ({$idQuery})");
+        $priceIDs  = array_filter(array_keys($records->map()), function($value) { return $value !== ''; });
+        return self::get()->filter('ID', $priceIDs);
+    }
+    
+    /**
+     * Returns the translated singular name.
+     * 
+     * @return string
+     */
+    public function singular_name() : string
+    {
         return Tools::singular_name_for($this);
     }
     
     /**
-     * Returns the translated plural name of the object. If no translation exists
-     * the class name will be returned.
+     * Returns the translated plural name.
      * 
-     * @return string the objects plural name
-     * 
-     * @author Sebastian Diel <sdiel@pixeltricks.de>
-     * @since 29.05.2018
+     * @return string
      */
-    public function plural_name() {
+    public function plural_name() : string
+    {
         return Tools::plural_name_for($this);
     }
     
     /**
      * Field labels for display in tables.
      *
-     * @param boolean $includerelations A boolean value to indicate if the labels returned include relation fields
+     * @param bool $includerelations A boolean value to indicate if the labels returned include relation fields
      *
      * @return array
-     *
-     * @author Roland Lehmann <rlehmann@pixeltricks.de>
-     * @since 23.08.2011
      */
-    public function fieldLabels($includerelations = true) {
+    public function fieldLabels($includerelations = true) : array
+    {
         $fieldLabels = array_merge(
                 parent::fieldLabels($includerelations),
                 Tools::field_labels_for(static::class),
@@ -129,38 +137,35 @@ class GraduatedPrice extends DataObject {
      * 
      * @return FieldList
      */
-    public function getCMSFields() {
-        $fields = parent::getCMSFields();
-        
-        $fields->removeByName('CustomerGroups');
-        
-        $groupsMap = [];
-        foreach (Group::get() as $group) {
-            // Listboxfield values are escaped, use ASCII char instead of &raquo;
-            $groupsMap[$group->ID] = $group->getBreadcrumbs(' > ');
-        }
-        asort($groupsMap);
-        $fields->addFieldToTab('Root.Main',
-            ListboxField::create('CustomerGroups', $this->fieldLabel('CustomerGroups'))
-                ->setSource($groupsMap)
-                ->setAttribute(
-                    'data-placeholder', 
-                    $this->fieldLabel('AddGroup')
-                )
-        );
-        
-        return $fields;
+    public function getCMSFields() : FieldList
+    {
+        $this->beforeUpdateCMSFields(function(FieldList $fields) {
+            $fields->removeByName('CustomerGroups');
+            $groupsMap = [];
+            foreach (Group::get() as $group) {
+                // Listboxfield values are escaped, use ASCII char instead of &raquo;
+                $groupsMap[$group->ID] = $group->getBreadcrumbs(' > ');
+            }
+            asort($groupsMap);
+            $fields->addFieldToTab('Root.Main',
+                ListboxField::create('CustomerGroups', $this->fieldLabel('CustomerGroups'))
+                    ->setSource($groupsMap)
+                    ->setAttribute(
+                        'data-placeholder', 
+                        $this->fieldLabel('AddGroup')
+                    )
+            );
+        });
+        return parent::getCMSFields();
     }
     
     /**
      * Summaryfields for display in tables.
      *
      * @return array
-     *
-     * @author Roland Lehmann <rlehmann@pixeltricks.de>
-     * @since 23.08.2011
      */
-    public function summaryFields() {
+    public function summaryFields() : array
+    {
         $summaryFields = [
             'RelatedGroupIndicator' => '&nbsp;',
             'minimumQuantity'       => $this->fieldLabel('minimumQuantity'),
@@ -176,7 +181,8 @@ class GraduatedPrice extends DataObject {
      * 
      * @return string
      */
-    public function getTitle() {
+    public function getTitle() : string
+    {
         $title  = $this->price->Nice();
         $title .= ' | ' . $this->fieldLabel('minimumQuantity') . ': ' . $this->minimumQuantity;
         if ($this->CustomerGroups()->exists()) {
@@ -190,25 +196,24 @@ class GraduatedPrice extends DataObject {
      *
      * @return string
      */
-    public function getPriceFormatted() {
+    public function getPriceFormatted() : string
+    {
         return $this->price->Nice();
     }
     
     /**
-     * helper for summary fields
+     * Concatination of all assigned groups names seperated by /
      * 
-     * @return string concatination of all assigned groups names seperated by /
+     * @return DBHTMLText
      */
-    public function getGroupsNamesFormatted() {
+    public function getGroupsNamesFormatted() : DBHTMLText
+    {
         $groups = $this->CustomerGroups();
         $groupsNamesFormatted = "";
         if ($groups->exists()) {
             $groupsNamesFormatted = implode(' / ', $groups->map()->toArray());
         } else {
-            $groupsNamesFormatted = sprintf(
-                '<strong style="color: red;">%s</strong>',
-                $this->fieldLabel('NoGroupRelated')
-            );
+            $groupsNamesFormatted = "<strong style=\"color: red;\">{$this->fieldLabel('NoGroupRelated')}</strong>";
         }
         $htmlText = DBHTMLText::create();
         $htmlText->setValue($groupsNamesFormatted);
@@ -222,18 +227,15 @@ class GraduatedPrice extends DataObject {
      *
      * @return string
      */
-    public function getRelatedGroupIndicator() {
+    public function getRelatedGroupIndicator() : DBHTMLText
+    {
         $indicatorColor = 'red';
         if ($this->CustomerGroups()->exists()) {
             $indicatorColor = 'green';
         }
-        $indicatorColorHtml = sprintf(
-                '<div style="background-color: %s;">&nbsp;</div>',
-                $indicatorColor
-        );
+        $indicatorColorHtml = "<div style=\"background-color: {$indicatorColor};\">&nbsp;</div>";
         $htmlText = DBHTMLText::create();
         $htmlText->setValue($indicatorColorHtml);
         return $htmlText;
     }
 }
-
