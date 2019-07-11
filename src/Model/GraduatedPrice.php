@@ -11,6 +11,8 @@ use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
+use SilverStripe\ORM\Filters\ExactMatchFilter;
+use SilverStripe\ORM\Filters\PartialMatchFilter;
 use SilverStripe\Security\Group;
 use SilverStripe\Security\Member;
 
@@ -177,6 +179,32 @@ class GraduatedPrice extends DataObject
         ];
         $this->extend('updateSummaryFields', $summaryFields);
         return $summaryFields;
+    }
+    
+    /**
+     * Returns the searchable fields.
+     * 
+     * @return array
+     */
+    public function searchableFields() : array
+    {
+        parent::searchableFields();
+        $fields = [
+            'price' => [
+                'title'  => $this->fieldLabel('price'),
+                'filter' => ExactMatchFilter::class
+            ],
+            'minimumQuantity' => [
+                'title'  => $this->fieldLabel('minimumQuantity'),
+                'filter' => ExactMatchFilter::class
+            ],
+            'Product.ProductNumberShop' => [
+                'title'  => $this->fieldLabel('Product'),
+                'filter' => ExactMatchFilter::class
+            ],
+        ];
+        $this->extend('updateSearchableFields', $fields);
+        return $fields;
     }
     
     /**

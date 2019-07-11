@@ -7,8 +7,11 @@ use SilverCart\Model\Customer\Customer;
 use SilverCart\Model\Order\ShoppingCartPosition;
 use SilverCart\ORM\FieldType\DBMoney;
 use SilverStripe\Control\Controller;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataExtension;
+use SilverStripe\ORM\SS_List;
 use SilverStripe\Security\Member;
 use SilverStripe\View\ArrayData;
 
@@ -24,22 +27,20 @@ use SilverStripe\View\ArrayData;
  * @since 29.05.2018
  * @license see license file in modules root directory
  */
-class ProductExtension extends DataExtension {
-
+class ProductExtension extends DataExtension
+{
     /**
      * Cache for method "getGraduatedPriceForCustomersGroups".
      *
      * @var GraduatedPrice[]
      */
     protected $graduatedPriceForCustomersGroups = [];
-
     /**
      * Cache for method "getGraduatedPricesForCustomersGroups".
      *
      * @var ArrayList[]
      */
     protected $graduatedPricesForCustomersGroups = [];
-    
     /**
      * 1:n relationships.
      *
@@ -61,11 +62,30 @@ class ProductExtension extends DataExtension {
      *         Roland Lehmann <rlehmann@pixeltricks.de>
      * @since 29.05.2018
      */
-    public function updatePrice(DBMoney &$price) {
+    public function updatePrice(DBMoney &$price) : void
+    {
         $customerPrice = $this->getGraduatedPriceForCustomersGroups();
-        if ($customerPrice instanceof GraduatedPrice &&
-            $customerPrice->exists()) {
+        if ($customerPrice instanceof GraduatedPrice
+         && $customerPrice->exists()
+        ) {
             $price = $customerPrice->price;
+        }
+    }
+    
+    /**
+     * Updates the CMS fields.
+     * 
+     * @param FieldList $fields Fields to update
+     * 
+     * @return void
+     */
+    public function updateCMSFields(FieldList $fields) : void
+    {
+        if ($this->owner->exists()) {
+            $grid = $fields->dataFieldByName('GraduatedPrices');
+            /* @var $grid \SilverStripe\Forms\GridField\GridField */
+            $config = $grid->getConfig();
+            $config->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
         }
     }
     
@@ -79,7 +99,8 @@ class ProductExtension extends DataExtension {
      * @author Sebastian Diel <sdiel@pixeltricks.de>
      * @since 29.05.2018
      */
-    public function updateFieldLabels(&$labels) {
+    public function updateFieldLabels(&$labels) : void
+    {
         $labels = array_merge(
                 $labels,
                 [
@@ -89,16 +110,17 @@ class ProductExtension extends DataExtension {
     }
 
     /**
-     * Calculates the most convenient price
+     * Calculates the most convenient price.
      * Selects all graduated prices for a customers groups that fit the $quantity.
      * 
-     * @return GraduatedPrice|false the most convenient price
+     * @return GraduatedPrice|null
      */
-    public function getGraduatedPriceForCustomersGroups() {
+    public function getGraduatedPriceForCustomersGroups() : ?GraduatedPrice
+    {
         if (!array_key_exists($this->owner->ID, $this->graduatedPriceForCustomersGroups)) {
             $member   = Customer::currentUser();
             $quantity = $this->owner->getProductQuantityInCart();
-            $price    = false;
+            $price    = null;
             $filter   = [
                 'ProductID' => $this->owner->ID,
             ];
@@ -119,24 +141,23 @@ class ProductExtension extends DataExtension {
     /**
      * Returns all graduated prices for a customers groups.
      *
-     * @return ArrayList
+     * @return SS_List
      */
-    public function getGraduatedPricesForCustomersGroups() {
+    public function getGraduatedPricesForCustomersGroups() : SS_List
+    {
         if (!array_key_exists($this->owner->ID, $this->graduatedPricesForCustomersGroups)) {
             $member = Customer::currentUser();
             $filter = ['ProductID' => $this->owner->ID];
             $this->owner->extend('updateGraduatedPricesFilter', $filter);
             $graduatedPrices                 = GraduatedPrice::get()->filter($filter)->sort('minimumQuantity', 'ASC');
             $graduatedPricesForMembersGroups = $this->filterGraduatedPrices($graduatedPrices, $member);
-            
             $this->owner->extend('updateGraduatedPricesForCustomersGroups', $graduatedPricesForMembersGroups, $member);
             $this->graduatedPricesForCustomersGroups[$this->owner->ID] = $graduatedPricesForMembersGroups->sort('minimumQuantity', 'ASC');
         }
-
         if ($this->graduatedPricesForCustomersGroups[$this->owner->ID]->exists()) {
             return $this->graduatedPricesForCustomersGroups[$this->owner->ID];
         } else {
-            return false;
+            return ArrayList::create();
         }
     }
     
@@ -151,26 +172,27 @@ class ProductExtension extends DataExtension {
      * @author Sebastian Diel <sdiel@pixeltricks.de>
      * @since 29.05.2018
      */
-    protected function filterGraduatedPrices($graduatedPrices, $member) {
-        $graduatedPricesForMembersGroups = new ArrayList();
-
+    protected function filterGraduatedPrices($graduatedPrices, $member) : ArrayList
+    {
+        $graduatedPricesForMembersGroups = ArrayList::create();
         if ($graduatedPrices->exists()) {
-            if ($member instanceof Member &&
-                $member->exists()) {
+            if ($member instanceof Member
+             && $member->exists()
+            ) {
                 foreach ($graduatedPrices as $graduatedPrice) {
-                    if ($graduatedPrice->CustomerGroups()->exists() &&
-                        $member->inGroups($graduatedPrice->CustomerGroups()) &&
-                        $this->isPriceQualified($graduatedPrice, $member)) {
-
+                    if ($graduatedPrice->CustomerGroups()->exists()
+                     && $member->inGroups($graduatedPrice->CustomerGroups())
+                     && $this->isPriceQualified($graduatedPrice, $member)
+                    ) {
                         $graduatedPricesForMembersGroups->push($graduatedPrice);
                     }
                 }
             } else {
                 foreach ($graduatedPrices as $graduatedPrice) {
-                    if ($graduatedPrice->CustomerGroups()->exists() &&
-                        $graduatedPrice->CustomerGroups()->find('Code', 'anonymous') &&
-                        $this->isPriceQualified($graduatedPrice)) {
-
+                    if ($graduatedPrice->CustomerGroups()->exists()
+                     && $graduatedPrice->CustomerGroups()->find('Code', 'anonymous')
+                     && $this->isPriceQualified($graduatedPrice)
+                    ) {
                         $graduatedPricesForMembersGroups->push($graduatedPrice);
                     }
                 }
@@ -187,18 +209,19 @@ class ProductExtension extends DataExtension {
      * @param GraduatedPrice $graduatedPrice Graduated price
      * @param Member         $member         Member
      * 
-     * @return boolean
+     * @return bool
      * 
      * @author Sebastian Diel <sdiel@pixeltricks.de>
      * @since 20.12.2017
      */
-    public function isPriceQualified(GraduatedPrice $graduatedPrice, Member $member = null) {
+    public function isPriceQualified(GraduatedPrice $graduatedPrice, Member $member = null) : bool
+    {
         $isPriceQualified = true;
-        $result = $graduatedPrice->extend('updateIsPriceQualified', $member);
-        if (is_array($result) &&
-            !empty($result) &&
-            in_array(false, $result, true)) {
-            
+        $result           = $graduatedPrice->extend('updateIsPriceQualified', $member);
+        if (is_array($result)
+         && !empty($result)
+         && in_array(false, $result, true)
+        ) {
             $isPriceQualified = false;
         }
         return $isPriceQualified;
@@ -209,19 +232,22 @@ class ProductExtension extends DataExtension {
      * the positions quantity will be returned. If the product is not in the cart
      * yet 1 will be returned.
      * 
-     * @return integer
+     * @return int
      */
-    public function getProductQuantityInCart() {
+    public function getProductQuantityInCart() : int
+    {
         $quantity = 1;
         $member   = Customer::currentUser();
-        if ($member instanceof Member &&
-            $member->exists()) {
-            $position    = ShoppingCartPosition::get()->filter([
+        if ($member instanceof Member
+         && $member->exists()
+        ) {
+            $position = ShoppingCartPosition::get()->filter([
                 'ProductID'      => $this->owner->ID,
                 'ShoppingCartID' => $member->ShoppingCartID,
             ])->first();
-            if ($position instanceof ShoppingCartPosition &&
-                $position->exists()) {
+            if ($position instanceof ShoppingCartPosition
+             && $position->exists()
+            ) {
                 $quantity = $position->Quantity;
             }
         }
@@ -238,13 +264,14 @@ class ProductExtension extends DataExtension {
      * @author Sebastian Diel <sdiel@pixeltricks.de>
      * @since 29.05.2018
      */
-    public function addPluggedInProductMetaData(ArrayList $metaData) {
-        if (Controller::curr()->hasMethod('isProductDetailView') &&
-            Controller::curr()->isProductDetailView()) {
+    public function addPluggedInProductMetaData(ArrayList $metaData) : void
+    {
+        if (Controller::curr()->hasMethod('isProductDetailView')
+         && Controller::curr()->isProductDetailView()
+        ) {
             $metaData->push(ArrayData::create([
                 'MetaData' => $this->owner->renderWith(GraduatedPrice::class . '_Table'),
             ]));
         }
     }
-    
 }

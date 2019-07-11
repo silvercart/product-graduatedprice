@@ -15,8 +15,8 @@ use SilverStripe\ORM\DataExtension;
  * @since 29.05.2018
  * @license see license file in modules root directory
  */
-class GroupExtension extends DataExtension {
-    
+class GroupExtension extends DataExtension
+{
     /**
      * n:m relationships.
      *
@@ -26,4 +26,3 @@ class GroupExtension extends DataExtension {
         'GraduatedPrices' => GraduatedPrice::class,
     ];
 }
-
