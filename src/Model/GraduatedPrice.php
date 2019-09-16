@@ -12,7 +12,6 @@ use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\Filters\ExactMatchFilter;
-use SilverStripe\ORM\Filters\PartialMatchFilter;
 use SilverStripe\Security\Group;
 use SilverStripe\Security\Member;
 
@@ -27,6 +26,13 @@ use SilverStripe\Security\Member;
  * @copyright pixeltricks GmbH
  * @since 29.05.2018
  * @license see license file in modules root directory
+ * 
+ * @property DBMoney $price           Price
+ * @property int     $minimumQuantity Minimum Quantity
+ * 
+ * @method Product Product() Returns the related product.
+ * 
+ * @method \SilverStripe\ORM\ManyManyList CustomerGroups() Returns the related customer groups.
  */
 class GraduatedPrice extends DataObject
 {
