@@ -1,0 +1,9 @@
+it:
+    SilverCart\GraduatedPrice\Model\GraduatedPrice:
+        BUY_WITH_VOLUME_DISCOUNT: 'Acquista con sconto sulla quantità'
+        FROM: 'a partire da'
+        MINIMUMQUANTITY: 'Numero minimo'
+        NO_GROUP_RELATED: 'Nessun gruppo di clienti è stato ancora assegnato. È necessario associare almeno un gruppo di clienti per poter utilizzare il prezzo.'
+        PLURALNAME: 'Tabelle prezzo'
+        PRICE: Prezzo
+        SINGULARNAME: 'Tabella dei prezzi'
