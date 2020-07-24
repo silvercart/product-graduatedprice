@@ -1,0 +1,9 @@
+nl_BE:
+    SilverCart\GraduatedPrice\Model\GraduatedPrice:
+        BUY_WITH_VOLUME_DISCOUNT: 'Koop met hoeveelheidskorting'
+        FROM: vanaf
+        MINIMUMQUANTITY: Minimumaantal
+        NO_GROUP_RELATED: 'Er werd nog geen klantengroep toegewezen. Er moet minimaal één klantengroep worden toegewezen, zodat de prijs kan worden gebruikt.'
+        PLURALNAME: Prijsschalen
+        PRICE: Prijs
+        SINGULARNAME: Prijsschaal
