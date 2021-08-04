@@ -1,0 +1,9 @@
+da_DK:
+    SilverCart\GraduatedPrice\Model\GraduatedPrice:
+        BUY_WITH_VOLUME_DISCOUNT: 'Køb med mængderabat'
+        FROM: fra
+        MINIMUMQUANTITY: 'mindste mængde'
+        NO_GROUP_RELATED: 'Der er endnu ikke blevet tildelt nogen kundegruppe. Der skal være tildelt mindst én kundegruppe, for at prisen kan anvendes.'
+        PLURALNAME: 'graduerede priser'
+        PRICE: Pris
+        SINGULARNAME: 'gradueret pris'
