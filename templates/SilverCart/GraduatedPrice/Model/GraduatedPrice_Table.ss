@@ -1,10 +1,10 @@
 <% if $getGraduatedPricesForCustomersGroups.count > 1 || $getGraduatedPricesForCustomersGroups.first.minimumQuantity > 1 %>
     <div class="silvercart-graduated-price-table">
         <h3><%t SilverCart\GraduatedPrice\Model\GraduatedPrice.BUY_WITH_VOLUME_DISCOUNT 'Buy with quantity discount' %>:</h3>
-        <table class="table">
+        <table class="table table-sm">
             <thead>
                 <tr>
-                    <th class="text-right"><%t SilverCart\GraduatedPrice\Model\GraduatedPrice.FROM 'from' %></th>
+                    <th class="text-right w-50"><%t SilverCart\GraduatedPrice\Model\GraduatedPrice.FROM 'from' %></th>
                     <th class="text-right"><%t SilverCart\Model\Product\Product.PRICE_SINGLE 'Price single' %></th>
                 </tr>
             </thead>
