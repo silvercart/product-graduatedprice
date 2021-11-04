@@ -1,9 +1,9 @@
 de:
-    SilverCart\GraduatedPrice\Model\GraduatedPrice:
-        BUY_WITH_VOLUME_DISCOUNT: 'Kaufen Sie mit Mengenrabatt'
-        FROM: ab
-        MINIMUMQUANTITY: Mindestanzahl
-        NO_GROUP_RELATED: 'Es wurde noch keine Kundengruppe zugeordnet. Es muss mindestens eine Kundengruppe zugeordnet werden, damit der Preis verwendet werden kann.'
-        PLURALNAME: Preisstaffeln
-        PRICE: Preis
-        SINGULARNAME: Preisstaffel
+  SilverCart\GraduatedPrice\Model\GraduatedPrice:
+    BUY_WITH_VOLUME_DISCOUNT: 'Kaufen Sie mit Mengenrabatt'
+    FROM: ab
+    MINIMUMQUANTITY: Mindestanzahl
+    NO_GROUP_RELATED: 'Es wurde noch keine Kundengruppe zugeordnet. Es muss mindestens eine Kundengruppe zugeordnet werden, damit der Preis verwendet werden kann.'
+    PLURALNAME: Preisstaffeln
+    PRICE: Preis
+    SINGULARNAME: Preisstaffel

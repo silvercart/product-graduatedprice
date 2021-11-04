@@ -1,9 +1,9 @@
 fr_BE:
-    SilverCart\GraduatedPrice\Model\GraduatedPrice:
-        BUY_WITH_VOLUME_DISCOUNT: 'Achetez avec une remise de quantité'
-        FROM: 'à partir de'
-        MINIMUMQUANTITY: 'Nombre minimum'
-        NO_GROUP_RELATED: 'Aucun groupe de clients n''a encore été attribué. Au moins un groupe de clients doit être attribué pour que le prix puisse être utilisé.'
-        PLURALNAME: 'Listes de prix'
-        PRICE: Prix
-        SINGULARNAME: 'Liste de prix'
+  SilverCart\GraduatedPrice\Model\GraduatedPrice:
+    BUY_WITH_VOLUME_DISCOUNT: 'Achetez avec une remise de quantité'
+    FROM: 'à partir de'
+    MINIMUMQUANTITY: 'Nombre minimum'
+    NO_GROUP_RELATED: 'Aucun groupe de clients n''a encore été attribué. Au moins un groupe de clients doit être attribué pour que le prix puisse être utilisé.'
+    PLURALNAME: 'Listes de prix'
+    PRICE: Prix
+    SINGULARNAME: 'Liste de prix'
