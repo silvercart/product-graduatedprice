@@ -1,0 +1,9 @@
+en_ZA:
+  SilverCart\GraduatedPrice\Model\GraduatedPrice:
+    BUY_WITH_VOLUME_DISCOUNT: 'Buy with quantity discount'
+    FROM: from
+    MINIMUMQUANTITY: 'Minimum number'
+    NO_GROUP_RELATED: 'No customer group has been assigned yet. At least one customer group must be assigned for the price to be used.'
+    PLURALNAME: 'Price scales'
+    PRICE: Price
+    SINGULARNAME: 'Price scale'

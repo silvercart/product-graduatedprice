@@ -1,0 +1,9 @@
+cs:
+  SilverCart\GraduatedPrice\Model\GraduatedPrice:
+    BUY_WITH_VOLUME_DISCOUNT: 'Koupit s množstevní slevou'
+    FROM: z
+    MINIMUMQUANTITY: 'Minimální počet'
+    NO_GROUP_RELATED: 'Zatím nebyla přiřazena žádná skupina zákazníků. Aby bylo možné cenu použít, musí být přiřazena alespoň jedna skupina zákazníků.'
+    PLURALNAME: 'Cenové stupnice'
+    PRICE: Cena
+    SINGULARNAME: 'Cenová stupnice'

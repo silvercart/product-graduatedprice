@@ -1,0 +1,9 @@
+pl:
+  SilverCart\GraduatedPrice\Model\GraduatedPrice:
+    BUY_WITH_VOLUME_DISCOUNT: 'Kup z rabatem ilościowym'
+    FROM: z
+    MINIMUMQUANTITY: 'Minimalna liczba'
+    NO_GROUP_RELATED: 'Nie przypisano jeszcze żadnej grupy klientów. Aby cena mogła być użyta, musi być przypisana przynajmniej jedna grupa klientów.'
+    PLURALNAME: 'Skale cenowe'
+    PRICE: Cena
+    SINGULARNAME: 'Skala cenowa'

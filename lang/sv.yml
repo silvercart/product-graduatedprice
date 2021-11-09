@@ -1,0 +1,9 @@
+sv:
+  SilverCart\GraduatedPrice\Model\GraduatedPrice:
+    BUY_WITH_VOLUME_DISCOUNT: 'Köp med mängdrabatt'
+    FROM: från
+    MINIMUMQUANTITY: 'Minsta antal'
+    NO_GROUP_RELATED: 'Ingen kundgrupp har tilldelats ännu. Minst en kundgrupp måste vara tilldelad för att priset ska kunna användas.'
+    PLURALNAME: Prisskalor
+    PRICE: Pris
+    SINGULARNAME: Prisskala

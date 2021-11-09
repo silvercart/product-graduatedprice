@@ -1,0 +1,9 @@
+tr_TR:
+  SilverCart\GraduatedPrice\Model\GraduatedPrice:
+    BUY_WITH_VOLUME_DISCOUNT: 'Toplu indirimle satın alın'
+    FROM: uzak
+    MINIMUMQUANTITY: 'Minimum sayı'
+    NO_GROUP_RELATED: 'Henüz bir müşteri grubu atanmadı. Fiyatın kullanılabilmesi için en az bir müşteri grubu atanmalıdır.'
+    PLURALNAME: 'Fiyat ölçekleri'
+    PRICE: fiyat
+    SINGULARNAME: 'Fiyat skalası'

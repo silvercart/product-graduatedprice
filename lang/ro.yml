@@ -1,0 +1,9 @@
+ro:
+  SilverCart\GraduatedPrice\Model\GraduatedPrice:
+    BUY_WITH_VOLUME_DISCOUNT: 'Cumpărați cu reducere de cantitate'
+    FROM: 'de la'
+    MINIMUMQUANTITY: 'Număr minim'
+    NO_GROUP_RELATED: 'Încă nu a fost atribuit niciun grup de clienți. Pentru ca prețul să fie utilizat, trebuie să fie atribuit cel puțin un grup de clienți.'
+    PLURALNAME: 'Bareme de prețuri'
+    PRICE: Preț
+    SINGULARNAME: 'Scară de prețuri'

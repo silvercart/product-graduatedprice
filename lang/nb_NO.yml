@@ -1,0 +1,9 @@
+nb_NO:
+  SilverCart\GraduatedPrice\Model\GraduatedPrice:
+    BUY_WITH_VOLUME_DISCOUNT: 'Kjøp med masserabatt'
+    FROM: borte
+    MINIMUMQUANTITY: 'Minimum antall'
+    NO_GROUP_RELATED: 'Ingen kundegruppe er ennå tildelt. Minst én kundegruppe må tildeles slik at prisen kan benyttes.'
+    PLURALNAME: Prisskalaer
+    PRICE: pris
+    SINGULARNAME: Prisskala

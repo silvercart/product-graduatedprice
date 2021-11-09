@@ -1,0 +1,9 @@
+fi:
+  SilverCart\GraduatedPrice\Model\GraduatedPrice:
+    BUY_WITH_VOLUME_DISCOUNT: 'Osta määräalennuksella'
+    FROM: osoitteesta
+    MINIMUMQUANTITY: Vähimmäismäärä
+    NO_GROUP_RELATED: 'Asiakasryhmää ei ole vielä määritetty. Vähintään yksi asiakasryhmä on määritettävä, jotta hintaa voidaan käyttää.'
+    PLURALNAME: Hinta-asteikot
+    PRICE: Hinta
+    SINGULARNAME: Hinta-asteikko
