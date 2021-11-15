@@ -67,9 +67,8 @@ class GraduatedPrice extends DataObject
      * @var array
      */
     private static $casting = [
-        'PriceFormatted'        => 'Varchar(20)',
-        'GroupsNamesFormatted'  => DBHTMLText::class,
-        'RelatedGroupIndicator' => DBHTMLText::class,
+        'PriceFormatted'       => 'Varchar(20)',
+        'GroupsNamesFormatted' => DBHTMLText::class,
     ];
     /**
      * DB table name
@@ -178,7 +177,6 @@ class GraduatedPrice extends DataObject
     public function summaryFields() : array
     {
         $summaryFields = [
-            'RelatedGroupIndicator' => '&nbsp;',
             'minimumQuantity'       => $this->fieldLabel('minimumQuantity'),
             'PriceFormatted'        => $this->fieldLabel('price'),
             'GroupsNamesFormatted'  => $this->fieldLabel('CustomerGroups'),
@@ -211,6 +209,33 @@ class GraduatedPrice extends DataObject
         ];
         $this->extend('updateSearchableFields', $fields);
         return $fields;
+    }
+    
+    /**
+     * Returns GridField row CSS classes.
+     * 
+     * @return array
+     */
+    public function getGridFieldRowClasses() : array
+    {
+        $classes = [];
+        if (!$this->isValidPrice()) {
+            $classes[] = 'table-danger';
+        }
+        return $classes;
+    }
+    
+    /**
+     * Returns whether this is a valid price.
+     * 
+     * @return bool
+     */
+    public function isValidPrice() : bool
+    {
+        $is = $this->CustomerGroups()->exists()
+           && $this->price->getAmount() > 0;
+        $this->extend('updateIsValidPrice', $is);
+        return $is;
     }
     
     /**
@@ -254,25 +279,6 @@ class GraduatedPrice extends DataObject
         }
         $htmlText = DBHTMLText::create();
         $htmlText->setValue($groupsNamesFormatted);
-        return $htmlText;
-    }
-    
-    /**
-     * Checks whether a customer group is related or not. If not, the graduated
-     * price is out of function and won't be used in any case. At least one 
-     * customer group has to be related to have a working graduated price
-     *
-     * @return string
-     */
-    public function getRelatedGroupIndicator() : DBHTMLText
-    {
-        $indicatorColor = 'red';
-        if ($this->CustomerGroups()->exists()) {
-            $indicatorColor = 'green';
-        }
-        $indicatorColorHtml = "<div style=\"background-color: {$indicatorColor};\">&nbsp;</div>";
-        $htmlText = DBHTMLText::create();
-        $htmlText->setValue($indicatorColorHtml);
         return $htmlText;
     }
 }

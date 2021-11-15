@@ -1,0 +1,6 @@
+---
+Name: silvercart-product-graduatedprice-config
+---
+SilverCart\CsvImport\Model\CsvImport:
+    allowed_target_dataobject_names:
+        - SilverCart\GraduatedPrice\Model\GraduatedPrice

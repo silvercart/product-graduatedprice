@@ -1,4 +1,7 @@
 de:
+  SilverCart\CsvImport\Model\CsvImport:
+    GraduatedPriceDefaultGroup: 'Standard Kundengruppe für Preisstaffeln'
+    GraduatedPriceDefaultGroupDesc: 'Die hier angegebene Kundengruppe wird für importierte Preisstaffeln verwendet, wenn kein passender Datensatz in der CSV enthalten ist.'
   SilverCart\GraduatedPrice\Model\GraduatedPrice:
     BUY_WITH_VOLUME_DISCOUNT: 'Kaufen Sie mit Mengenrabatt'
     FROM: ab

@@ -1,4 +1,7 @@
 en:
+  SilverCart\CsvImport\Model\CsvImport:
+    GraduatedPriceDefaultGroup: 'Default Customer Group for Graduated Prices'
+    GraduatedPriceDefaultGroupDesc: 'This customer group will be used for imported graduated prices if there is no matching record within the CSV file.'
   SilverCart\GraduatedPrice\Model\GraduatedPrice:
     BUY_WITH_VOLUME_DISCOUNT: 'Buy with quantity discount'
     FROM: from
