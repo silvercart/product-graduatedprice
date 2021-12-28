@@ -2,15 +2,18 @@
 
 namespace SilverCart\GraduatedPrice\Extensions;
 
+use SilverCart\GraduatedPrice\Extensions\PageControllerExtension as GraduatedPricePageController;
 use SilverCart\GraduatedPrice\Model\GraduatedPrice;
 use SilverCart\Model\Customer\Customer;
 use SilverCart\Model\Order\ShoppingCartPosition;
+use SilverCart\Model\Product\Product;
 use SilverCart\ORM\FieldType\DBMoney;
 use SilverStripe\Control\Controller;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataExtension;
+use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\ORM\SS_List;
 use SilverStripe\Security\Member;
 use SilverStripe\View\ArrayData;
@@ -26,6 +29,8 @@ use SilverStripe\View\ArrayData;
  * @copyright pixeltricks GmbH
  * @since 29.05.2018
  * @license see license file in modules root directory
+ * 
+ * @property \SilverCart\Model\Product\Product $owner Owner
  */
 class ProductExtension extends DataExtension
 {
@@ -69,6 +74,52 @@ class ProductExtension extends DataExtension
          && $customerPrice->exists()
         ) {
             $price = $customerPrice->price;
+        }
+    }
+    
+    /**
+     * ID list of already rendered price info modals.
+     * 
+     * @var int[]
+     */
+    protected $renderedModals = [];
+
+
+    /**
+     * Updates the price nice.
+     * 
+     * @param DBHTMLText &$priceNice Price nice
+     * 
+     * @return void
+     */
+    public function updatePriceNice(&$priceNice) : void
+    {
+        if (Controller::has_curr()) {
+            $ctrl = Controller::curr();
+            if ($ctrl->hasMethod('isProductDetailView')
+             && $ctrl->isProductDetailView()
+             && $ctrl->getDetailViewProduct()->ID === $this->owner->ID
+            ) {
+                return;
+            }
+        }
+        if ($this->getGraduatedPricesForCustomersGroups()->count() > 1
+         || ($this->getGraduatedPricesForCustomersGroups()->count() === 1
+          && $this->getGraduatedPricesForCustomersGroups()->first()->minimumQuantity > 1)
+        ) {
+            $prices    = $this->getGraduatedPricesForCustomersGroups()->map('ID', 'priceAmount')->toArray();
+            $minPrice  = min($prices);
+            $money     = DBMoney::create()->setAmount($minPrice)->setCurrency($this->owner->getPrice()->getCurrency());
+            $priceNice = $this->owner->renderWith(GraduatedPrice::class . '_PriceNice', [
+                'MinPriceNice' => _t(Product::class . '.PriceFrom', 'from {price}', ['price' => $money->Nice()]),
+            ]);
+            if (!in_array($this->owner->ID, $this->renderedModals)) {
+                $modal = $this->owner->renderWith(GraduatedPrice::class . '_TableModal', [
+                    'MinPriceNice' => _t(Product::class . '.PriceFrom', 'from {price}', ['price' => $money->Nice()]),
+                ]);
+                $this->renderedModals[] = $this->owner->ID;
+                GraduatedPricePageController::addModal($modal);
+            }
         }
     }
     

@@ -1,6 +1,9 @@
 ---
 Name: silvercart-product-graduatedprice-extensions
 ---
+SilverCart\Model\Pages\PageController:
+  extensions:
+    - SilverCart\GraduatedPrice\Extensions\PageControllerExtension
 SilverCart\Model\Product\Product:
   extensions:
     - SilverCart\GraduatedPrice\Extensions\ProductExtension

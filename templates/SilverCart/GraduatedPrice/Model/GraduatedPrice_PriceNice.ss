@@ -1,0 +1,1 @@
+<span class="cursor-pointer" data-toggle="modal" data-target="#modal-price-table-{$ID}">{$MinPriceNice}<ion-icon name="information-circle-outline" class="icon icon--size-medium lazyload align-text-top mr-0"></ion-icon></span>
