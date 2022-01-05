@@ -213,6 +213,16 @@ class ProductExtension extends DataExtension
     }
     
     /**
+     * Returns all graduated prices for a customers groups as JSON string. 
+     * 
+     * @return string
+     */
+    public function getGraduatedPricesForCustomersGroupsJSON() : string
+    {
+        return (string) json_encode($this->owner->getGraduatedPricesForCustomersGroups()->map('minimumQuantity', 'PriceFormatted')->toArray());
+    }
+    
+    /**
      * Filters the graduated prices by the current Member context.
      * 
      * @param DataList $graduatedPrices Graduated prices
