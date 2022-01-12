@@ -11,6 +11,7 @@ use SilverCart\ORM\FieldType\DBMoney;
 use SilverStripe\Control\Controller;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
+use SilverStripe\Forms\GridField\GridFieldFilterHeader;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\FieldType\DBHTMLText;
@@ -137,6 +138,7 @@ class ProductExtension extends DataExtension
             /* @var $grid \SilverStripe\Forms\GridField\GridField */
             $config = $grid->getConfig();
             $config->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
+            $config->removeComponentsByType(GridFieldFilterHeader::class);
         }
     }
     
