@@ -26,24 +26,27 @@ use SilverStripe\Security\Member;
  * @copyright pixeltricks GmbH
  * @since 29.05.2018
  * @license see license file in modules root directory
- * 
+ *
  * @property DBMoney $price           Price
  * @property int     $minimumQuantity Minimum Quantity
- * 
+ * @property bool    $isTopseller  Is Topseller
+ *
  * @method Product Product() Returns the related product.
- * 
+ *
  * @method \SilverStripe\ORM\ManyManyList CustomerGroups() Returns the related customer groups.
  */
 class GraduatedPrice extends DataObject
 {
+    use \SilverCart\ORM\ExtensibleDataObject;
     /**
      * DB attributes
-     * 
-     * @var array 
+     *
+     * @var array
      */
     private static $db = [
         'price'             => DBMoney::class,
         'minimumQuantity'   => 'Int',
+        'isTopseller'       => 'Boolean(0)',
     ];
     /**
      * 1:1 or 1:n relationships.
@@ -63,7 +66,7 @@ class GraduatedPrice extends DataObject
     ];
     /**
      * cast the return values of methods to attributes
-     * 
+     *
      * @var array
      */
     private static $casting = [
@@ -76,13 +79,13 @@ class GraduatedPrice extends DataObject
      * @var string
      */
     private static $table_name = 'SilvercartGraduatedPrice';
-    
+
     /**
      * Returns all prices for the given $group and $product.
-     * 
+     *
      * @param Group   $group   Group to get prices for
      * @param Product $product Product to get prices for
-     * 
+     *
      * @return DataList
      */
     public static function get_by_group(Group $group, Product $product) : DataList
@@ -96,27 +99,27 @@ class GraduatedPrice extends DataObject
         }
         return self::get()->filter('ID', $priceIDs);
     }
-    
+
     /**
      * Returns the translated singular name.
-     * 
+     *
      * @return string
      */
     public function singular_name() : string
     {
         return Tools::singular_name_for($this);
     }
-    
+
     /**
      * Returns the translated plural name.
-     * 
+     *
      * @return string
      */
     public function plural_name() : string
     {
         return Tools::plural_name_for($this);
     }
-    
+
     /**
      * Field labels for display in tables.
      *
@@ -126,25 +129,19 @@ class GraduatedPrice extends DataObject
      */
     public function fieldLabels($includerelations = true) : array
     {
-        $fieldLabels = array_merge(
-                parent::fieldLabels($includerelations),
-                Tools::field_labels_for(static::class),
-                [
-                    'price'           => _t(GraduatedPrice::class . '.PRICE', 'Price'),
-                    'minimumQuantity' => _t(GraduatedPrice::class . '.MINIMUMQUANTITY', 'Minimum Quantity'),
-                    'Product'         => Product::singleton()->singular_name(),
-                    'CustomerGroups'  => Group::singleton()->plural_name(),
-                    'NoGroupRelated'  => _t(GraduatedPrice::class . '.NO_GROUP_RELATED', 'No related customer group found!'),
-                    'AddGroup'        => _t(Member::class . '.ADDGROUP', 'Add group'),
-                ]
-        );
-        $this->extend('updateFieldLabels', $fieldLabels);
-        return $fieldLabels;
+        return $this->defaultFieldLabels($includerelations, [
+            'price'           => _t(GraduatedPrice::class . '.PRICE', 'Price'),
+            'minimumQuantity' => _t(GraduatedPrice::class . '.MINIMUMQUANTITY', 'Minimum Quantity'),
+            'Product'         => Product::singleton()->singular_name(),
+            'CustomerGroups'  => Group::singleton()->plural_name(),
+            'NoGroupRelated'  => _t(GraduatedPrice::class . '.NO_GROUP_RELATED', 'No related customer group found!'),
+            'AddGroup'        => _t(Member::class . '.ADDGROUP', 'Add group'),
+        ]);
     }
-    
+
     /**
      * Returns the CMS fields.
-     * 
+     *
      * @return FieldList
      */
     public function getCMSFields() : FieldList
@@ -161,14 +158,14 @@ class GraduatedPrice extends DataObject
                 ListboxField::create('CustomerGroups', $this->fieldLabel('CustomerGroups'))
                     ->setSource($groupsMap)
                     ->setAttribute(
-                        'data-placeholder', 
+                        'data-placeholder',
                         $this->fieldLabel('AddGroup')
                     )
             );
         });
         return parent::getCMSFields();
     }
-    
+
     /**
      * Summaryfields for display in tables.
      *
@@ -180,14 +177,15 @@ class GraduatedPrice extends DataObject
             'minimumQuantity'       => $this->fieldLabel('minimumQuantity'),
             'PriceFormatted'        => $this->fieldLabel('price'),
             'GroupsNamesFormatted'  => $this->fieldLabel('CustomerGroups'),
+            'isTopseller'           => $this->fieldLabel('isTopseller'),
         ];
         $this->extend('updateSummaryFields', $summaryFields);
         return $summaryFields;
     }
-    
+
     /**
      * Returns the searchable fields.
-     * 
+     *
      * @return array
      */
     public function searchableFields() : array
@@ -206,14 +204,18 @@ class GraduatedPrice extends DataObject
                 'title'  => $this->fieldLabel('Product'),
                 'filter' => ExactMatchFilter::class
             ],
+            'isTopseller' => [
+                'title'  => $this->fieldLabel('isTopseller'),
+                'filter' => ExactMatchFilter::class
+            ],
         ];
         $this->extend('updateSearchableFields', $fields);
         return $fields;
     }
-    
+
     /**
      * Returns GridField row CSS classes.
-     * 
+     *
      * @return array
      */
     public function getGridFieldRowClasses() : array
@@ -224,10 +226,10 @@ class GraduatedPrice extends DataObject
         }
         return $classes;
     }
-    
+
     /**
      * Returns whether this is a valid price.
-     * 
+     *
      * @return bool
      */
     public function isValidPrice() : bool
@@ -237,10 +239,10 @@ class GraduatedPrice extends DataObject
         $this->extend('updateIsValidPrice', $is);
         return $is;
     }
-    
+
     /**
      * Returns a generic title to display in backend breadcrumbs.
-     * 
+     *
      * @return string
      */
     public function getTitle() : string
@@ -252,7 +254,7 @@ class GraduatedPrice extends DataObject
         }
         return $title;
     }
-    
+
     /**
      * Returns the Price formatted by locale.
      *
@@ -262,10 +264,10 @@ class GraduatedPrice extends DataObject
     {
         return $this->price->Nice();
     }
-    
+
     /**
      * Concatination of all assigned groups names seperated by /
-     * 
+     *
      * @return DBHTMLText
      */
     public function getGroupsNamesFormatted() : DBHTMLText

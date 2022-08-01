@@ -5,6 +5,7 @@ en:
   SilverCart\GraduatedPrice\Model\GraduatedPrice:
     BUY_WITH_VOLUME_DISCOUNT: 'Buy with quantity discount'
     FROM: from
+    isTopseller: 'is topseller'
     MINIMUMQUANTITY: 'minimum quantity'
     NO_GROUP_RELATED: 'No related customer group found! There must be at least one related customer group to use this price!'
     PLURALNAME: 'graduated prices'
