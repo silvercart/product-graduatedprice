@@ -171,19 +171,26 @@ class ProductExtension extends DataExtension
     public function getGraduatedPriceForCustomersGroups() : ?GraduatedPrice
     {
         if (!array_key_exists($this->owner->ID, $this->graduatedPriceForCustomersGroups)) {
-            $member   = Customer::currentUser();
-            $quantity = $this->owner->getProductQuantityInCart();
-            $price    = null;
-            $filter   = [
-                'ProductID' => $this->owner->ID,
-            ];
-            $this->owner->extend('updateGraduatedPriceFilter', $filter);
-            $graduatedPrices                 = GraduatedPrice::get()->filter($filter)->where('"minimumQuantity" <= ' . $quantity);
+            $member    = Customer::currentUser();
+            $quantity  = $this->owner->getProductQuantityInCart();
+            $price     = null;
+            $filter    = ['ProductID' => $this->owner->ID];
+            $filterAny = [];
+            $this->owner->extend('updateGraduatedPriceFilter', $filter, $filterAny);
+            $graduatedPrices                 = GraduatedPrice::get()
+                    ->filter($filter)
+                    ->filterAny($filterAny)
+                    ->where('"minimumQuantity" <= ' . $quantity);
             $graduatedPricesForMembersGroups = $this->filterGraduatedPrices($graduatedPrices, $member);
 
             $this->owner->extend('updateGraduatedPriceForCustomersGroups', $graduatedPricesForMembersGroups, $member, $quantity);
             if ($graduatedPricesForMembersGroups) {
-                $price = $graduatedPricesForMembersGroups->sort('minimumQuantity', "DESC")->first();
+                $price = $graduatedPricesForMembersGroups
+                        ->sort([
+                            'minimumQuantity' => 'DESC',
+                            'priceAmount'     => 'ASC',
+                        ])
+                        ->first();
             }
             $this->graduatedPriceForCustomersGroups[$this->owner->ID] = $price;
         }
@@ -199,13 +206,21 @@ class ProductExtension extends DataExtension
     public function getGraduatedPricesForCustomersGroups() : SS_List
     {
         if (!array_key_exists($this->owner->ID, $this->graduatedPricesForCustomersGroups)) {
-            $member = Customer::currentUser();
-            $filter = ['ProductID' => $this->owner->ID];
-            $this->owner->extend('updateGraduatedPricesFilter', $filter);
-            $graduatedPrices                 = GraduatedPrice::get()->filter($filter)->sort('minimumQuantity', 'ASC');
+            $member    = Customer::currentUser();
+            $filter    = ['ProductID' => $this->owner->ID];
+            $filterAny = [];
+            $this->owner->extend('updateGraduatedPricesFilter', $filter, $filterAny);
+            $graduatedPrices                 = GraduatedPrice::get()
+                    ->filter($filter)
+                    ->filterAny($filterAny)
+                    ->sort('minimumQuantity', 'ASC');
             $graduatedPricesForMembersGroups = $this->filterGraduatedPrices($graduatedPrices, $member);
             $this->owner->extend('updateGraduatedPricesForCustomersGroups', $graduatedPricesForMembersGroups, $member);
-            $this->graduatedPricesForCustomersGroups[$this->owner->ID] = $graduatedPricesForMembersGroups->sort('minimumQuantity', 'ASC');
+            $this->graduatedPricesForCustomersGroups[$this->owner->ID] = $graduatedPricesForMembersGroups
+                    ->sort([
+                        'minimumQuantity' => 'ASC',
+                        'priceAmount'     => 'ASC',
+                    ]);
         }
         if ($this->graduatedPricesForCustomersGroups[$this->owner->ID]->exists()) {
             return $this->graduatedPricesForCustomersGroups[$this->owner->ID];
@@ -261,6 +276,7 @@ class ProductExtension extends DataExtension
                 }
             }
         }
+        $this->owner->extend('updateFilterGraduatedPrices', $graduatedPricesForMembersGroups, $graduatedPrices, $member);
         return $graduatedPricesForMembersGroups;
     }
     

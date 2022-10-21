@@ -224,6 +224,7 @@ class GraduatedPrice extends DataObject
         if (!$this->isValidPrice()) {
             $classes[] = 'table-danger';
         }
+        $this->extend('updateGridFieldRowClasses', $classes);
         return $classes;
     }
 
