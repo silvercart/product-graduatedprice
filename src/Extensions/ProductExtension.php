@@ -246,9 +246,6 @@ class ProductExtension extends DataExtension
      * @param Member   $member          Member
      * 
      * @return ArrayList
-     * 
-     * @author Sebastian Diel <sdiel@pixeltricks.de>
-     * @since 29.05.2018
      */
     protected function filterGraduatedPrices($graduatedPrices, $member) : ArrayList
     {
@@ -277,6 +274,17 @@ class ProductExtension extends DataExtension
             }
         }
         $this->owner->extend('updateFilterGraduatedPrices', $graduatedPricesForMembersGroups, $graduatedPrices, $member);
+        $priceList = [];
+        foreach ($graduatedPricesForMembersGroups as $graduatedPrice) {
+            if (array_key_exists($graduatedPrice->minimumQuantity, $priceList)) {
+                if ($graduatedPrice->price->getAmount() > $priceList[$graduatedPrice->minimumQuantity]->price->getAmount()) {
+                    $graduatedPricesForMembersGroups->remove($graduatedPrice);
+                } else {
+                    $graduatedPricesForMembersGroups->remove($priceList[$graduatedPrice->minimumQuantity]);
+                }
+            }
+            $priceList[$graduatedPrice->minimumQuantity] = $graduatedPrice;
+        }
         return $graduatedPricesForMembersGroups;
     }
     
