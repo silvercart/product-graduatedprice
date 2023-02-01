@@ -176,11 +176,12 @@ class ProductExtension extends DataExtension
             $price     = null;
             $filter    = ['ProductID' => $this->owner->ID];
             $filterAny = [];
-            $this->owner->extend('updateGraduatedPriceFilter', $filter, $filterAny);
+            $where     = ["minimumQuantity <= {$quantity}"];
+            $this->owner->extend('updateGraduatedPriceFilter', $filter, $filterAny, $where);
             $graduatedPrices                 = GraduatedPrice::get()
                     ->filter($filter)
                     ->filterAny($filterAny)
-                    ->where('"minimumQuantity" <= ' . $quantity);
+                    ->where($where);
             $graduatedPricesForMembersGroups = $this->filterGraduatedPrices($graduatedPrices, $member);
 
             $this->owner->extend('updateGraduatedPriceForCustomersGroups', $graduatedPricesForMembersGroups, $member, $quantity);
@@ -209,10 +210,12 @@ class ProductExtension extends DataExtension
             $member    = Customer::currentUser();
             $filter    = ['ProductID' => $this->owner->ID];
             $filterAny = [];
-            $this->owner->extend('updateGraduatedPricesFilter', $filter, $filterAny);
+            $where     = [];
+            $this->owner->extend('updateGraduatedPricesFilter', $filter, $filterAny, $where);
             $graduatedPrices                 = GraduatedPrice::get()
                     ->filter($filter)
                     ->filterAny($filterAny)
+                    ->where($where)
                     ->sort('minimumQuantity', 'ASC');
             $graduatedPricesForMembersGroups = $this->filterGraduatedPrices($graduatedPrices, $member);
             $this->owner->extend('updateGraduatedPricesForCustomersGroups', $graduatedPricesForMembersGroups, $member);
