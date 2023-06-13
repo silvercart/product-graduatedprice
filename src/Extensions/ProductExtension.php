@@ -10,14 +10,17 @@ use SilverCart\Model\Product\Product;
 use SilverCart\ORM\FieldType\DBMoney;
 use SilverStripe\Control\Controller;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use SilverStripe\Forms\GridField\GridFieldFilterHeader;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataExtension;
+use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\ORM\SS_List;
 use SilverStripe\Security\Member;
 use SilverStripe\View\ArrayData;
+use function _t;
 
 /**
  * Extension for Product.
@@ -31,30 +34,42 @@ use SilverStripe\View\ArrayData;
  * @since 29.05.2018
  * @license see license file in modules root directory
  * 
- * @property \SilverCart\Model\Product\Product $owner Owner
+ * @property Product $owner Owner
  */
 class ProductExtension extends DataExtension
 {
-    /**
-     * Cache for method "getGraduatedPriceForCustomersGroups".
-     *
-     * @var GraduatedPrice[]
-     */
-    protected $graduatedPriceForCustomersGroups = [];
-    /**
-     * Cache for method "getGraduatedPricesForCustomersGroups".
-     *
-     * @var ArrayList[]
-     */
-    protected $graduatedPricesForCustomersGroups = [];
     /**
      * 1:n relationships.
      *
      * @var array
      */
-    private static $has_many = [
+    private static array $has_many = [
         'GraduatedPrices' => GraduatedPrice::class,
     ];
+    /**
+     * List of already updated PriceNice.
+     * 
+     * @var DBHTMLText[]
+     */
+    protected static array $updatedPriceNice = [];
+    /**
+     * Cache for method "getGraduatedPriceForCustomersGroups".
+     *
+     * @var GraduatedPrice[]
+     */
+    protected array $graduatedPriceForCustomersGroups = [];
+    /**
+     * Cache for method "getGraduatedPricesForCustomersGroups".
+     *
+     * @var ArrayList[]
+     */
+    protected array $graduatedPricesForCustomersGroups = [];
+    /**
+     * ID list of already rendered price info modals.
+     * 
+     * @var int[]
+     */
+    protected array $renderedModals = [];
     
     /**
      * decorates the price getter of Product. It updates a products price if
@@ -62,11 +77,7 @@ class ProductExtension extends DataExtension
      * 
      * @param DBMoney &$price the return value of the decorated method passed by reference
      * 
-     * @return void 
-     * 
-     * @author Sebastian Diel <sdiel@pixeltricks.de>,
-     *         Roland Lehmann <rlehmann@pixeltricks.de>
-     * @since 29.05.2018
+     * @return void
      */
     public function updatePrice(DBMoney &$price) : void
     {
@@ -77,14 +88,9 @@ class ProductExtension extends DataExtension
             $price = $customerPrice->price;
         }
     }
-    
-    /**
-     * ID list of already rendered price info modals.
-     * 
-     * @var int[]
-     */
-    protected $renderedModals = [];
 
+    public static $dcount = 0;
+    public static $handledIDs = [];
 
     /**
      * Updates the price nice.
@@ -95,6 +101,10 @@ class ProductExtension extends DataExtension
      */
     public function updatePriceNice(&$priceNice) : void
     {
+        if (array_key_exists($this->owner->ID, self::$updatedPriceNice)) {
+            $priceNice = self::$updatedPriceNice[$this->owner->ID];
+            return;
+        }
         if (Controller::has_curr()) {
             $ctrl = Controller::curr();
             if ($ctrl->hasMethod('isProductDetailView')
@@ -122,6 +132,7 @@ class ProductExtension extends DataExtension
                 GraduatedPricePageController::addModal($modal);
             }
         }
+        self::$updatedPriceNice[$this->owner->ID] = $priceNice;
     }
     
     /**
@@ -135,7 +146,7 @@ class ProductExtension extends DataExtension
     {
         if ($this->owner->exists()) {
             $grid = $fields->dataFieldByName('GraduatedPrices');
-            /* @var $grid \SilverStripe\Forms\GridField\GridField */
+            /* @var $grid GridField */
             $config = $grid->getConfig();
             $config->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
             $config->removeComponentsByType(GridFieldFilterHeader::class);
@@ -148,18 +159,12 @@ class ProductExtension extends DataExtension
      * @param array &$labels Labels to update
      * 
      * @return void
-     * 
-     * @author Sebastian Diel <sdiel@pixeltricks.de>
-     * @since 29.05.2018
      */
     public function updateFieldLabels(&$labels) : void
     {
-        $labels = array_merge(
-                $labels,
-                [
-                    'GraduatedPrices' => GraduatedPrice::singleton()->plural_name(),
-                ]
-        );
+        $labels = array_merge($labels, [
+            'GraduatedPrices' => GraduatedPrice::singleton()->plural_name(),
+        ]);
     }
 
     /**
@@ -168,7 +173,7 @@ class ProductExtension extends DataExtension
      * 
      * @return GraduatedPrice|null
      */
-    public function getGraduatedPriceForCustomersGroups() : ?GraduatedPrice
+    public function getGraduatedPriceForCustomersGroups() : GraduatedPrice|null
     {
         if (!array_key_exists($this->owner->ID, $this->graduatedPriceForCustomersGroups)) {
             $member    = Customer::currentUser();
@@ -300,9 +305,6 @@ class ProductExtension extends DataExtension
      * @param Member         $member         Member
      * 
      * @return bool
-     * 
-     * @author Sebastian Diel <sdiel@pixeltricks.de>
-     * @since 20.12.2017
      */
     public function isPriceQualified(GraduatedPrice $graduatedPrice, Member $member = null) : bool
     {
@@ -350,9 +352,6 @@ class ProductExtension extends DataExtension
      * @param ArrayList $metaData Existng list of additional meta data to render
      * 
      * @return void
-     * 
-     * @author Sebastian Diel <sdiel@pixeltricks.de>
-     * @since 29.05.2018
      */
     public function addPluggedInProductMetaData(ArrayList $metaData) : void
     {
