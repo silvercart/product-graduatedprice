@@ -79,6 +79,12 @@ class GraduatedPrice extends DataObject
      * @var string
      */
     private static $table_name = 'SilvercartGraduatedPrice';
+    /**
+     * DB table name
+     *
+     * @var string
+     */
+    private static string $default_sort = 'minimumQuantity ASC, priceAmount ASC';
 
     /**
      * Returns all prices for the given $group and $product.
